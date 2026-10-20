@@ -58,9 +58,19 @@ Each dish name is a link. Tapping it opens a Google Images search for that exact
 
 ### Inline mode
 
-Type `@<bot username>` in any chat to get the menus from today through Friday for your campus. Tap one to send it into that chat. Add a campus name (`@<bot> lier`) to share another campus. Users without a campus get a button that opens the bot to pick one.
+Share a menu in any chat without leaving it:
 
-Turn it on once in @BotFather: `/setinline`, pick the bot, and set a placeholder such as `campus (optional)`.
+1. Type `@zhralovkabot ` (with the space) in a DM, group or channel comment.
+2. A list shows the days from today through Friday for your campus (Monday to Friday at the weekend). Each entry has the date and its dish names.
+3. Tap a day. The full menu is sent into the chat as you, marked "via @zhralovkabot". Dish names still link to Google Images. The shared message has no day buttons, because it's a snapshot of that one day.
+
+Add a campus name to share another campus: `@zhralovkabot lier`, or just a prefix like `de na`. Your saved campus stays the same. If nothing matches, your own campus is used.
+
+Someone who hasn't picked a campus gets an empty list with a **📍 Pick your campus first** button. It opens the bot, runs `/start`, and once they've picked a campus the inline list works.
+
+Results are in the sender's language and cached for 5 minutes per user. When the menu service is down or a campus hasn't published its menu, the list is empty.
+
+Turn it on once in @BotFather: send `/setinline`, pick the bot, and set the placeholder to `Campus (optional), e.g. Geel`.
 
 ## Layout
 
