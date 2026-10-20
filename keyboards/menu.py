@@ -56,10 +56,12 @@ def day_nav_keyboard(day: int, lang: str) -> InlineKeyboardMarkup | None:
     return InlineKeyboardMarkup(inline_keyboard=[buttons]) if buttons else None
 
 
-def settings_keyboard(lang: str) -> InlineKeyboardMarkup:
+def settings_keyboard(lang: str, subscribed: bool) -> InlineKeyboardMarkup:
+    daily = t(lang, "btn_daily_off" if subscribed else "btn_daily_on")
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=t(lang, "btn_change_campus"), callback_data="settings:campus")],
             [InlineKeyboardButton(text=t(lang, "btn_change_lang"), callback_data="settings:lang")],
+            [InlineKeyboardButton(text=daily, callback_data="settings:subscribe")],
         ]
     )

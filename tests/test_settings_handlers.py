@@ -25,6 +25,31 @@ class SettingsHandlersTest(HandlerTestCase):
         await settings.switch_lang(msg)
         self.assertEqual((await db.get_user(42))[1], "en")
 
+    async def test_subscribe_toggles(self):
+        await db.set_campus(42, "Geel")
+        msg = message()
+        await settings.subscribe(msg)
+        self.assertTrue(await db.is_subscribed(42))
+        self.assertIn("every weekday at 11:00", sent_text(msg))
+        await settings.subscribe(msg)
+        self.assertFalse(await db.is_subscribed(42))
+        self.assertEqual(sent_text(msg), TEXTS["en"]["unsubscribed"])
+
+    async def test_subscribe_without_campus_asks_for_one(self):
+        msg = message()
+        await settings.subscribe(msg)
+        self.assertFalse(await db.is_subscribed(42))
+        self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])
+
+    async def test_settings_button_toggles_and_redraws(self):
+        await db.set_campus(42, "Geel")
+        cb = callback("settings:subscribe")
+        await settings.subscribe_from_settings(cb)
+        self.assertTrue(await db.is_subscribed(42))
+        edit = cb.message.edit_text.await_args.kwargs
+        self.assertIn("Daily menu: <b>on</b>", edit["text"])
+        self.assertEqual(edit["reply_markup"].inline_keyboard[2][0].text, TEXTS["en"]["btn_daily_off"])
+
 
 if __name__ == "__main__":
     unittest.main()

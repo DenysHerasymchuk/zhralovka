@@ -1,13 +1,13 @@
 import re
 from contextlib import suppress
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LinkPreviewOptions, Message
 
+from config import TIMEZONE
 from formatting import format_day, pick_day
 from handlers.common import profile
 from i18n import all_langs, day_name, t
@@ -15,7 +15,6 @@ from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import Week
 
-TIMEZONE = ZoneInfo("Europe/Brussels")
 # Dish names are links; without this Telegram previews the first one.
 NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 

@@ -43,16 +43,21 @@ Coolify setup:
 
 The keyboard has three buttons: 🍽 Today, 📅 This week and ⚙️ Settings. In the week view you switch days with the buttons under the message. The same actions are available as commands:
 
-| Command     | What it does                          |
-|-------------|---------------------------------------|
-| `/start`    | Welcome message, asks for your campus |
-| `/today`    | Today's menu                          |
-| `/week`    | This week, Monday to Friday (alias `/menu`) |
-| `/campus`   | Pick a different campus               |
-| `/language` | Switch between English and Dutch      |
-| `/help`     | List of commands                      |
+| Command      | What it does                                |
+|--------------|---------------------------------------------|
+| `/start`     | Welcome message, asks for your campus       |
+| `/today`     | Today's menu                                |
+| `/week`      | This week, Monday to Friday (alias `/menu`) |
+| `/subscribe` | Daily menu on or off                        |
+| `/campus`    | Pick a different campus                     |
+| `/language`  | Switch between English and Dutch            |
+| `/help`      | List of commands                            |
 
 New users get Dutch if their Telegram app is set to Dutch. Everyone else starts in English.
+
+### Daily menu
+
+`/subscribe` (or the 🔔 button in ⚙️ Settings) sends you that day's menu every weekday at 11:00 Brussels time, with the ⬅️/➡️ buttons. Send it again to stop. Nothing is sent when the kitchen lists no dishes for the day or the menu service is down. Users who block the bot are unsubscribed automatically. Set `DAILY_AT` (for example `10:30`) to change the time.
 
 Each dish name is a link. Tapping it opens a Google Images search for that exact name in the browser.
 
@@ -84,6 +89,7 @@ i18n/en.py, nl.py    all bot text, one file per language
 i18n/__init__.py     text lookup and language detection
 formatting.py        turns a day's menu into a message
 middleware.py        logs every update with user, action and duration
+notifier.py          sends the daily menu to subscribers
 keyboards/menu.py    reply and inline keyboards
 handlers/            start, menu, settings, inline and fallback handlers; common.py has the user lookup
 tests/               unit tests, network mocked

@@ -11,8 +11,14 @@ async def init(path=DB_PATH) -> None:
             "CREATE TABLE IF NOT EXISTS users ("
             " user_id INTEGER PRIMARY KEY,"
             " campus TEXT,"
-            " lang TEXT NOT NULL DEFAULT 'en')"
+            " lang TEXT NOT NULL DEFAULT 'en',"
+            " subscribed INTEGER NOT NULL DEFAULT 0)"
         )
+        # Databases created before /subscribe existed lack the column.
+        async with db.execute("PRAGMA table_info(users)") as cursor:
+            columns = {row[1] for row in await cursor.fetchall()}
+        if "subscribed" not in columns:
+            await db.execute("ALTER TABLE users ADD COLUMN subscribed INTEGER NOT NULL DEFAULT 0")
         await db.commit()
 
 
@@ -32,8 +38,8 @@ async def add_user(user_id: int, lang: str) -> None:
         await db.commit()
 
 
-async def _set(user_id: int, column: str, value: str) -> None:
-    # column comes from the two callers below, never from user input
+async def _set(user_id: int, column: str, value: str | int) -> None:
+    # column comes from the callers below, never from user input
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             f"INSERT INTO users (user_id, {column}) VALUES (?, ?) "
@@ -49,3 +55,25 @@ async def set_campus(user_id: int, campus: str) -> None:
 
 async def set_lang(user_id: int, lang: str) -> None:
     await _set(user_id, "lang", lang)
+
+
+async def set_subscribed(user_id: int, subscribed: bool) -> None:
+    await _set(user_id, "subscribed", int(subscribed))
+
+
+async def is_subscribed(user_id: int) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT subscribed FROM users WHERE user_id = ?", (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+    return bool(row and row[0])
+
+
+async def subscribers() -> list[tuple[int, str, str]]:
+    """(user_id, campus, lang) for every subscriber who has picked a campus."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT user_id, campus, lang FROM users WHERE subscribed = 1 AND campus IS NOT NULL"
+        ) as cursor:
+            return await cursor.fetchall()

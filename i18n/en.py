@@ -11,6 +11,8 @@ TEXTS = {
     "btn_settings": "⚙️ Settings",
     "btn_change_campus": "📍 Change campus",
     "btn_change_lang": "🌐 Taal: Nederlands",
+    "btn_daily_on": "🔔 Send me the menu daily",
+    "btn_daily_off": "🔕 Stop the daily menu",
     "placeholder": "Hungry?",
 
     # Onboarding
@@ -29,11 +31,16 @@ TEXTS = {
     "settings": (
         "⚙️ <b>Settings</b>\n\n"
         "<blockquote>📍 Campus: <b>{campus}</b>\n"
-        "🌐 Language: <b>English</b></blockquote>"
+        "🌐 Language: <b>English</b>\n"
+        "🔔 Daily menu: <b>{daily}</b></blockquote>"
     ),
     "no_campus": "not picked yet",
+    "daily_on": "on",
+    "daily_off": "off",
     "campus_saved": "✅ <b>Campus set to {campus}</b>\nTap 🍽 Today to see what's for lunch.",
     "lang_saved": "✅ <b>Switched to English</b>",
+    "subscribed": "🔔 <b>Daily menu on</b>\nI'll send you the menu every weekday at {time}. Send /subscribe again to stop.",
+    "unsubscribed": "🔕 <b>Daily menu off</b>\nSend /subscribe to turn it back on.",
 
     # Menu
     "weekend": (
@@ -62,6 +69,7 @@ TEXTS = {
         "❓ <b>What I can do</b>\n\n"
         "<blockquote>/today  today's menu\n"
         "/week or /menu  flip through Monday to Friday\n"
+        "/subscribe  get the menu every weekday morning\n"
         "/campus  change your campus\n"
         "/language  switch to Dutch</blockquote>\n"
         "To share a menu, type my @username in any chat and pick a day. "
@@ -71,6 +79,7 @@ TEXTS = {
     ),
     "cmd_today": "Today's menu",
     "cmd_week": "This week's menu",
+    "cmd_subscribe": "Daily menu on/off",
     "cmd_campus": "Change campus",
     "cmd_language": "Taal: Nederlands",
     "cmd_help": "What this bot can do",

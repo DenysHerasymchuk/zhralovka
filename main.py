@@ -12,10 +12,11 @@ from handlers.inline import router as inline_router
 from handlers.menu import router as menu_router
 from handlers.settings import router as settings_router
 from handlers.start import router as start_router
+import notifier
 from i18n import LANGS, t
 from middleware import log_updates
 
-COMMANDS = ("today", "week", "campus", "language", "help", "start")
+COMMANDS = ("today", "week", "subscribe", "campus", "language", "help", "start")
 
 log = logging.getLogger("bot")
 
@@ -53,7 +54,11 @@ async def main():
     me = await bot.get_me()
     await set_commands(bot)
     log.info("Starting @%s", me.username)
-    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    daily = asyncio.create_task(notifier.run(bot))
+    try:
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    finally:
+        daily.cancel()
 
 
 if __name__ == "__main__":
