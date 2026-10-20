@@ -19,25 +19,35 @@ class SettingsHandlersTest(HandlerTestCase):
         await settings.save_campus(cb)
         self.assertIsNone(await db.get_user(42))
 
-    async def test_language_toggle(self):
+    async def test_language_command_sends_picker(self):
         msg = message()
-        await settings.switch_lang(msg)
-        self.assertEqual((await db.get_user(42))[1], "nl")
-        self.assertEqual(sent_text(msg), TEXTS["nl"]["lang_saved"])
-        msg.answer_photo.assert_not_awaited()
-        await settings.switch_lang(msg)
-        self.assertEqual((await db.get_user(42))[1], "en")
+        await settings.ask_lang(msg)
+        self.assertEqual(sent_text(msg), TEXTS["en"]["pick_lang"])
+        names = [row[0].text for row in sent_markup(msg).inline_keyboard]
+        self.assertEqual(names, ["✅ 🇬🇧 English", "🇳🇱 Nederlands", "🇺🇦 Українська"])
 
-    async def test_language_button_edits_settings_in_place(self):
-        await db.set_campus(42, "Geel")
+    async def test_language_button_opens_picker_in_place(self):
         cb = callback("settings:lang")
-        await settings.switch_lang_from_settings(cb)
-        self.assertEqual((await db.get_user(42))[1], "nl")
+        await settings.ask_lang_from_settings(cb)
+        cb.message.answer.assert_not_awaited()
+        self.assertEqual(cb.message.edit_text.await_args.args[0], TEXTS["en"]["pick_lang"])
+
+    async def test_picking_a_language_returns_to_settings_in_it(self):
+        await db.set_campus(42, "Geel")
+        cb = callback("lang:uk")
+        await settings.save_lang(cb)
+        self.assertEqual((await db.get_user(42))[1], "uk")
         cb.message.delete.assert_not_awaited()
         cb.message.answer.assert_not_awaited()
         edit = cb.message.edit_text.await_args
-        self.assertIn("⚙️ <b>Instellingen</b>", edit.args[0])
-        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[1][0].text, TEXTS["nl"]["btn_change_lang"])
+        self.assertIn("⚙️ <b>Налаштування</b>", edit.args[0])
+        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[1][0].text, TEXTS["uk"]["btn_change_lang"])
+
+    async def test_unknown_language_is_ignored(self):
+        cb = callback("lang:xx")
+        await settings.save_lang(cb)
+        cb.message.edit_text.assert_not_awaited()
+        self.assertEqual((await db.get_user(42) or (None, "en"))[1], "en")
 
     async def test_prices_button_toggles_and_redraws(self):
         cb = callback("settings:prices")

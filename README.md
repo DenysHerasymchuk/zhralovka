@@ -1,6 +1,6 @@
 # Menubot
 
-A Telegram bot that shows the Thomas More cafeteria menu. You pick your campus once and the bot remembers it, along with whether you want the menu in English or Dutch.
+A Telegram bot that shows the Thomas More cafeteria menu. You pick your campus once and the bot remembers it, along with your language: English, Dutch or Ukrainian.
 
 Menus come from `https://tmmenumanagement.azurewebsites.net/api/WeekMenu/<campus>`. Supported campuses: Antwerpen, De Nayer, Geel, Lier, Mechelen, Turnhout and Vorselaar.
 
@@ -51,10 +51,12 @@ The keyboard has three buttons: 🍽 Today, 📅 This week and ⚙️ Settings. 
 | `/prices`    | Cafeteria prices (alias `/price`)           |
 | `/subscribe` | Daily menu on or off                        |
 | `/campus`    | Pick a different campus                     |
-| `/language`  | Switch between English and Dutch            |
+| `/language`  | Pick English, Dutch or Ukrainian            |
 | `/help`      | List of commands                            |
 
-New users get Dutch if their Telegram app is set to Dutch. Everyone else starts in English.
+New users get Dutch or Ukrainian if their Telegram app is set to one of those. Everyone else starts in English. ⚙️ Settings → 🌐 Language (or `/language`) shows the three languages, and choosing one turns the same message back into Settings in that language.
+
+The menu service only publishes dish names in English and Dutch, so in Ukrainian the bot's own text, dates, categories and the `/prices` board are translated while the dish names stay English. The Ukrainian strings live in `i18n/uk.py` (including `CATEGORIES`) and `UK_NAMES` in `menu/prices.py`.
 
 ### Prices
 

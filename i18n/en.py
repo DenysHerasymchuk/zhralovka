@@ -1,4 +1,5 @@
 DAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+SHORT_DAYS = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
 MONTHS = ("January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December")
 
@@ -12,7 +13,7 @@ TEXTS = {
     "btn_hide_prices": "💶 Hide prices",
     "btn_settings": "⚙️ Settings",
     "btn_change_campus": "📍 Change campus",
-    "btn_change_lang": "🌐 Taal: Nederlands",
+    "btn_change_lang": "🌐 Language",
     "btn_daily_on": "🔔 Send me the menu daily",
     "btn_daily_off": "🔕 Stop the daily menu",
     "btn_change_time": "⏰ Change time",
@@ -44,7 +45,7 @@ TEXTS = {
     "daily_on": "on",
     "daily_off": "off",
     "campus_saved": "✅ <b>Campus set to {campus}</b>\nTap 🍽 Today to see what's for lunch.",
-    "lang_saved": "✅ <b>Switched to English</b>",
+    "pick_lang": "🌐 <b>Choose your language</b>",
     "subscribed": (
         "🔔 <b>Daily menu on</b>\n"
         "I'll send you the menu at {time}. Change the time and days in ⚙️ Settings, "
@@ -88,7 +89,7 @@ TEXTS = {
         "/prices  cafeteria prices\n"
         "/subscribe  get the menu every weekday morning\n"
         "/campus  change your campus\n"
-        "/language  switch to Dutch</blockquote>\n"
+        "/language  change language</blockquote>\n"
         "To share a menu, type my @username in any chat and pick a day. "
         "Add a campus name to see another campus.\n\n"
         "Menus come straight from the Thomas More kitchens. If something "
@@ -99,7 +100,7 @@ TEXTS = {
     "cmd_prices": "Cafeteria prices",
     "cmd_subscribe": "Daily menu on/off",
     "cmd_campus": "Change campus",
-    "cmd_language": "Taal: Nederlands",
+    "cmd_language": "Change language",
     "cmd_help": "What this bot can do",
     "cmd_start": "Start over",
 }

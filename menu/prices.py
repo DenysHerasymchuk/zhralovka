@@ -69,6 +69,51 @@ SECTIONS = (
 )
 
 
+# Ukrainian names, keyed by the English name of each section and item.
+UK_NAMES = {
+    "Sandwiches": "Сендвічі",
+    "Bread roll": "Булочка",
+    "Baguette club": "Багет клаб",
+    "Baguette snack": "Багет снек",
+    "Baguette luxe": "Багет люкс",
+    "Roll + spread": "Булочка з начинкою",
+    "Hot meals": "Гарячі страви",
+    "Soup": "Суп",
+    "Daily special": "Страва дня",
+    "Fries + mayo": "Картопля фрі + майонез",
+    "Snack + fries": "Снек + фрі",
+    "Fried snack": "Смажений снек",
+    "Panini": "Паніні",
+    "Sausage roll": "Ковбаска в тісті",
+    "Puff pastry": "Листкова випічка",
+    "Chicken roll": "Курка в тісті",
+    "Pizzabaguette": "Піца-багет",
+    "Quiche": "Кіш",
+    "Croque + sauce": "Крок + соус",
+    "Cold dishes": "Холодні страви",
+    "Salad bar menu": "Салат-бар меню",
+    "Extra cup": "Додаткова порція",
+    "Salad mini": "Міні-салат",
+    "Desserts": "Десерти",
+    "Donut/muffin": "Пончик/мафін",
+    "Pastry": "Тістечко",
+    "Alpro pudding": "Пудинг Alpro",
+    "Danio 165 g": "Danio 165 г",
+    "Fruit salad": "Фруктовий салат",
+    "Candy bar": "Батончик",
+    "Drinks": "Напої",
+    "Hot drink": "Гарячий напій",
+    "Brick drink": "Напій у пачці",
+    "Starbucks iced": "Starbucks айс-кава",
+    "Smoothie 25 cl": "Смузі 25 cl",
+    "Protein shake": "Протеїновий шейк",
+    "Arizona ice tea": "Arizona айс-ті",
+    "Water 33 cl": "Вода 33 cl",
+    "Soft drink can": "Газований напій",
+    "Monster": "Monster",
+}
+
+
 def _item(en: str) -> Item:
     return next(item for section in SECTIONS for item in section.items if item.en == en)
 

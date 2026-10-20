@@ -1,4 +1,5 @@
 DAY_NAMES = ("maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag")
+SHORT_DAYS = ("Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo")
 MONTHS = ("januari", "februari", "maart", "april", "mei", "juni", "juli",
           "augustus", "september", "oktober", "november", "december")
 
@@ -12,7 +13,7 @@ TEXTS = {
     "btn_hide_prices": "💶 Verberg prijzen",
     "btn_settings": "⚙️ Instellingen",
     "btn_change_campus": "📍 Andere campus",
-    "btn_change_lang": "🌐 Language: English",
+    "btn_change_lang": "🌐 Taal",
     "btn_daily_on": "🔔 Stuur me elke dag het menu",
     "btn_daily_off": "🔕 Stop het dagelijkse menu",
     "btn_change_time": "⏰ Ander tijdstip",
@@ -44,7 +45,7 @@ TEXTS = {
     "daily_on": "aan",
     "daily_off": "uit",
     "campus_saved": "✅ <b>Campus ingesteld op {campus}</b>\nTik op 🍽 Vandaag om te zien wat er op het menu staat.",
-    "lang_saved": "✅ <b>Overgeschakeld naar het Nederlands</b>",
+    "pick_lang": "🌐 <b>Kies je taal</b>",
     "subscribed": (
         "🔔 <b>Dagelijks menu aan</b>\n"
         "Ik stuur je het menu om {time}. Tijdstip en dagen pas je aan via ⚙️ Instellingen, "
@@ -89,7 +90,7 @@ TEXTS = {
         "/prices  prijzen in de cafetaria\n"
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
         "/campus  kies een andere campus\n"
-        "/language  wissel naar Engels</blockquote>\n"
+        "/language  kies een andere taal</blockquote>\n"
         "Om een menu te delen, typ mijn @gebruikersnaam in een chat en kies een dag. "
         "Zet er een campusnaam achter voor een andere campus.\n\n"
         "De menu's komen rechtstreeks van de Thomas More-keukens. Klopt er "
@@ -100,7 +101,7 @@ TEXTS = {
     "cmd_prices": "Prijzen in de cafetaria",
     "cmd_subscribe": "Dagelijks menu aan/uit",
     "cmd_campus": "Andere campus",
-    "cmd_language": "Language: English",
+    "cmd_language": "Andere taal",
     "cmd_help": "Wat deze bot kan",
     "cmd_start": "Opnieuw beginnen",
 }

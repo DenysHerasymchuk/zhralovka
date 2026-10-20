@@ -46,6 +46,12 @@ class FormatDayTest(unittest.TestCase):
             text = format_day(week(Dish(category, "", "Dish", "")), 1, "en", "Geel", prices=True)
             self.assertIn(f"<b>{category}</b> · {price}\n", text)
 
+    def test_ukrainian_dates_and_categories_with_english_dishes(self):
+        text = format_day(week(SOUP), 1, "uk", "Geel")
+        self.assertIn("<b>Вівторок</b>, 13 жовтня", text)
+        self.assertIn("🥣 <b>Суп</b>\n", text)
+        self.assertIn(">Leek soup</a>", text)
+
     def test_prices_hidden_by_default(self):
         self.assertNotIn("€", format_day(week(SOUP), 1, "en", "Geel"))
 

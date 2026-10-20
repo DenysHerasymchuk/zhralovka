@@ -7,7 +7,7 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-from i18n import day_name, t
+from i18n import LANG_NAMES, day_short, t
 from menu.models import CAMPUSES
 from menu.prices import SECTIONS
 
@@ -38,7 +38,7 @@ def campus_keyboard(current: str | None = None) -> InlineKeyboardMarkup:
 def days_keyboard(start: date, selected: int, lang: str) -> InlineKeyboardMarkup:
     buttons = []
     for day in range(5):
-        label = f"{day_name(lang, day)[:2].capitalize()} {(start + timedelta(days=day)).day}"
+        label = f"{day_short(lang, day)} {(start + timedelta(days=day)).day}"
         buttons.append(
             InlineKeyboardButton(
                 text="🇺🇦" if day == selected else label,
@@ -85,10 +85,17 @@ def prices_keyboard(selected: int) -> InlineKeyboardMarkup:
 def notify_days_keyboard(days: str, lang: str) -> InlineKeyboardMarkup:
     buttons = [
         InlineKeyboardButton(
-            text=f"✅ {day_name(lang, day)[:2].capitalize()}" if str(day) in days else day_name(lang, day)[:2].capitalize(),
+            text=f"✅ {day_short(lang, day)}" if str(day) in days else day_short(lang, day),
             callback_data=f"ndays:{day}",
         )
         for day in range(5)
     ]
     done = InlineKeyboardButton(text=t(lang, "btn_done"), callback_data="ndays:done")
     return InlineKeyboardMarkup(inline_keyboard=[buttons, [done]])
+
+
+def language_keyboard(current: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"✅ {name}" if code == current else name, callback_data=f"lang:{code}")]
+        for code, name in LANG_NAMES.items()
+    ])

@@ -114,6 +114,16 @@ class MenuHandlersTest(HandlerTestCase):
                 await menu.switch_day(cb)
             self.assertEqual(cb.message.edit_media.await_args.args[0].media.path.stem, banner)
 
+    async def test_week_buttons_in_ukrainian(self):
+        await db.set_campus(42, "Geel")
+        await db.set_lang(42, "uk")
+        msg = message()
+        with patch("handlers.menu.today", return_value=SATURDAY), \
+             patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+            await menu.show_week(msg)
+        labels = [b.text for b in sent_markup(msg).inline_keyboard[0]]
+        self.assertEqual(labels, ["🇺🇦", "Вт 13", "Ср 14", "Чт 15", "Пт 16"])
+
     async def test_prices_follow_the_setting(self):
         await db.set_campus(42, "Geel")
         msg = message()

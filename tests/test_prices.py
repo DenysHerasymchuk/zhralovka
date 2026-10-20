@@ -3,7 +3,7 @@ import unittest
 
 from formatting import format_prices
 from handlers import prices
-from menu.prices import SECTIONS
+from menu.prices import SECTIONS, UK_NAMES
 from tests.helpers import HandlerTestCase, callback, message, sent_markup, sent_picture, sent_text
 
 
@@ -15,8 +15,19 @@ class PriceDataTest(unittest.TestCase):
                 self.assertTrue(all(cents > 0 for cents in item[2:]), item)
                 self.assertLessEqual(item.student, item.bancontact, item)
 
+    def test_every_name_has_a_ukrainian_translation(self):
+        for section in SECTIONS:
+            self.assertIn(section.en, UK_NAMES)
+            for item in section.items:
+                self.assertIn(item.en, UK_NAMES)
+
+    def test_ukrainian_board(self):
+        text = format_prices(1, "uk")
+        self.assertIn("<b>🍲 Гарячі страви</b>", text)
+        self.assertIn("<b>Страва дня</b>\n🎓 €5,40", text)
+
     def test_every_section_fits_a_photo_caption(self):
-        for lang in ("en", "nl"):
+        for lang in ("en", "nl", "uk"):
             for i in range(len(SECTIONS)):
                 visible = re.sub(r"<[^>]+>", "", format_prices(i, lang))
                 self.assertLess(len(visible), 1024, (lang, i))

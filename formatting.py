@@ -2,9 +2,9 @@ from datetime import date, timedelta
 from html import escape
 from urllib.parse import urlencode
 
-from i18n import day_name, month_name, t
+from i18n import category_name, day_name, month_name, t
 from menu.models import DAYS, Week, is_lunch
-from menu.prices import SECTIONS, category_price
+from menu.prices import SECTIONS, UK_NAMES, category_price
 
 # Matched against the English category name; first hit wins.
 CATEGORY_EMOJI = (
@@ -33,11 +33,16 @@ def pick_day(today: date) -> tuple[int, bool]:
 
 
 def _pick(lang: str, en: str, nl: str) -> str:
-    return (en if lang == "en" else nl) or en or nl
+    """The API only has English and Dutch, so every other language gets English."""
+    return (nl if lang == "nl" else en) or en or nl
+
+
+def _price_name(lang: str, en: str, nl: str) -> str:
+    return UK_NAMES[en] if lang == "uk" else _pick(lang, en, nl)
 
 
 def _dish_card(dish, lang: str, prices: bool) -> str:
-    category = _pick(lang, dish.category_en, dish.category_nl)
+    category = category_name(lang, dish.category_en) or _pick(lang, dish.category_en, dish.category_nl)
     name = _pick(lang, dish.en, dish.nl)
     photos = IMAGE_SEARCH_URL + urlencode({"tbm": "isch", "q": name})
     price = category_price(dish.category_en) if prices else None
@@ -89,11 +94,11 @@ def _euro(cents: int) -> str:
 
 def _price_card(item, lang: str) -> str:
     prices = f"🎓 {_euro(item.student)} · 🏢 {_euro(item.intern)} · 💳 {_euro(item.bancontact)}"
-    return f"<blockquote><b>{escape(_pick(lang, item.en, item.nl))}</b>\n{prices}</blockquote>"
+    return f"<blockquote><b>{escape(_price_name(lang, item.en, item.nl))}</b>\n{prices}</blockquote>"
 
 
 def format_prices(section: int, lang: str) -> str:
     current = SECTIONS[section]
-    lines = [f"<b>{current.emoji} {escape(_pick(lang, current.en, current.nl))}</b>", ""]
+    lines = [f"<b>{current.emoji} {escape(_price_name(lang, current.en, current.nl))}</b>", ""]
     lines += (_price_card(item, lang) for item in current.items)
     return "\n".join(lines)

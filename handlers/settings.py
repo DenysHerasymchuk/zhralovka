@@ -9,8 +9,8 @@ from aiogram.types import CallbackQuery, Message
 import db
 import screens
 from handlers.common import profile
-from i18n import all_langs, day_name, t
-from keyboards.menu import campus_keyboard, main_keyboard, settings_keyboard
+from i18n import LANGS, all_langs, day_short, t
+from keyboards.menu import campus_keyboard, language_keyboard, main_keyboard, settings_keyboard
 from menu.models import CAMPUSES
 
 log = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ router = Router()
 
 
 def days_label(days: str, lang: str) -> str:
-    return ", ".join(day_name(lang, int(d))[:2].capitalize() for d in sorted(days))
+    return ", ".join(day_short(lang, int(d)) for d in sorted(days))
 
 
 async def settings_view(user_id: int, campus: str | None, lang: str) -> dict:
@@ -71,19 +71,30 @@ async def save_campus(callback: CallbackQuery):
     await callback.answer()
 
 
-async def toggle_lang(user) -> str:
-    _, lang = await profile(user)
-    lang = "nl" if lang == "en" else "en"
-    await db.set_lang(user.id, lang)
-    log.info("User %s switched to %s", user.id, lang)
-    return lang
-
-
 @router.message(Command("language"))
-async def switch_lang(message: Message):
-    lang = await toggle_lang(message.from_user)
-    # A new message is the only way to swap the bottom keyboard to the new language.
-    await message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
+async def ask_lang(message: Message):
+    _, lang = await profile(message.from_user)
+    await message.answer(t(lang, "pick_lang"), reply_markup=language_keyboard(lang))
+
+
+@router.callback_query(F.data == "settings:lang")
+async def ask_lang_from_settings(callback: CallbackQuery):
+    _, lang = await profile(callback.from_user)
+    await screens.edit(callback.message, t(lang, "pick_lang"), reply_markup=language_keyboard(lang))
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("lang:"))
+async def save_lang(callback: CallbackQuery):
+    lang = callback.data.removeprefix("lang:")
+    if lang not in LANGS:
+        await callback.answer()
+        return
+    campus, _ = await profile(callback.from_user)
+    await db.set_lang(callback.from_user.id, lang)
+    log.info("User %s switched to %s", callback.from_user.id, lang)
+    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
+    await callback.answer()
 
 
 @router.callback_query(F.data == "settings:prices")
@@ -92,13 +103,5 @@ async def toggle_prices(callback: CallbackQuery):
     show = not await db.get_show_prices(callback.from_user.id)
     await db.set_show_prices(callback.from_user.id, show)
     log.info("User %s turned menu prices %s", callback.from_user.id, "on" if show else "off")
-    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
-    await callback.answer()
-
-
-@router.callback_query(F.data == "settings:lang")
-async def switch_lang_from_settings(callback: CallbackQuery):
-    lang = await toggle_lang(callback.from_user)
-    campus, _ = await profile(callback.from_user)
     await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
     await callback.answer()
