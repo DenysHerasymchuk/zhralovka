@@ -1,3 +1,4 @@
+import logging
 from contextlib import suppress
 
 from aiogram import F, Router
@@ -11,6 +12,7 @@ from i18n import all_langs, t
 from keyboards.menu import campus_keyboard, main_keyboard, settings_keyboard
 from menu.models import CAMPUSES
 
+log = logging.getLogger(__name__)
 router = Router()
 
 
@@ -45,6 +47,7 @@ async def save_campus(callback: CallbackQuery):
 
     _, lang = await profile(callback.from_user)
     await db.set_campus(callback.from_user.id, campus)
+    log.info("User %s picked campus %s", callback.from_user.id, campus)
     with suppress(TelegramBadRequest):
         await callback.message.delete()
     await callback.message.answer(t(lang, "campus_saved", campus=campus), reply_markup=main_keyboard(lang))
@@ -55,6 +58,7 @@ async def toggle_lang(message: Message, user) -> None:
     _, lang = await profile(user)
     lang = "nl" if lang == "en" else "en"
     await db.set_lang(user.id, lang)
+    log.info("User %s switched to %s", user.id, lang)
     # A new message is the only way to swap the reply keyboard to the new language.
     await message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
 

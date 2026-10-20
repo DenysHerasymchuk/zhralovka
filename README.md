@@ -24,6 +24,8 @@ docker build -t menubot .
 docker run -d --name menubot --env-file .env -v menubot-data:/data --restart unless-stopped menubot
 ```
 
+Logs go to stdout, so `docker logs menubot` (or Coolify's Logs tab) shows them. Each update is one line, like `user=42 message '/today' 85ms`. Set `LOG_LEVEL=DEBUG` to also see menu cache hits.
+
 The database lives in the `menubot-data` volume, so it survives rebuilds. Run only one instance per bot token: Telegram polling doesn't allow two.
 
 ## CI/CD
@@ -65,6 +67,7 @@ menu/client.py       fetches the menu API, caches each campus for 30 minutes
 i18n/en.py, nl.py    all bot text, one file per language
 i18n/__init__.py     text lookup and language detection
 formatting.py        turns a day's menu into a message
+middleware.py        logs every update with user, action and duration
 keyboards/menu.py    reply and inline keyboards
 handlers/            start, menu, settings and fallback handlers; common.py has the user lookup
 tests/               unit tests, network mocked

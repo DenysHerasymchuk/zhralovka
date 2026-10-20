@@ -7,6 +7,7 @@ from aiogram.types import FSInputFile, Message
 
 import db
 from i18n import detect_lang, t
+from handlers.common import profile
 from keyboards.menu import campus_keyboard, main_keyboard
 
 PHOTO_PATH = Path(__file__).parent.parent / "src" / "pictures" / "hero.jpeg"
@@ -16,8 +17,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def start(message: Message):
-    await db.add_user(message.from_user.id, detect_lang(message.from_user.language_code))
-    campus, lang = await db.get_user(message.from_user.id)
+    campus, lang = await profile(message.from_user)
 
     await message.answer_photo(
         FSInputFile(PHOTO_PATH),

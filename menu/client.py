@@ -29,6 +29,7 @@ async def _get(url: str) -> str:
 async def fetch_week(campus: str) -> Week | None:
     cached = _cache.get(campus)
     if cached and time.monotonic() - cached[0] < CACHE_TTL:
+        log.debug("Menu cache hit for %s", campus)
         return cached[1]
 
     try:
@@ -38,4 +39,8 @@ async def fetch_week(campus: str) -> Week | None:
         raise MenuUnavailable from exc
 
     _cache[campus] = (time.monotonic(), week)
+    if week:
+        log.info("Fetched menu for %s, week of %s", campus, week.start)
+    else:
+        log.info("No menu published for %s", campus)
     return week
