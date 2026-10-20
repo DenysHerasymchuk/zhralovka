@@ -56,6 +56,20 @@ class LocalizeTest(HandlerTestCase):
         self.assertEqual(week.days["Monday"][0].en, "Leek soup")
         self.assertEqual(await db.get_translations(NAMES, "uk"), {})
 
+    async def test_prewarm_translates_every_campus_once(self):
+        with patch("menu.translate.fetch_week", AsyncMock(return_value=WEEK)) as fetch, \
+             patch("menu.translate._deepl", AsyncMock(side_effect=ukrainian)) as deepl:
+            await translate.prewarm()
+            await translate.prewarm()  # the next hour: everything is cached
+        self.assertEqual(fetch.await_count, 2 * len(translate.CAMPUSES))
+        deepl.assert_awaited_once()  # same dishes everywhere, so one request in total
+
+    async def test_prewarm_does_nothing_without_a_key(self):
+        with patch("menu.translate.DEEPL_API_KEY", ""), \
+             patch("menu.translate.fetch_week", AsyncMock()) as fetch:
+            await translate.prewarm()
+        fetch.assert_not_awaited()
+
     def test_free_and_pro_hosts(self):
         self.assertEqual(translate._deepl_url("abc:fx"), "https://api-free.deepl.com/v2/translate")
         self.assertEqual(translate._deepl_url("abc"), "https://api.deepl.com/v2/translate")

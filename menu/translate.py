@@ -4,7 +4,8 @@ import aiohttp
 
 import db
 from config import DEEPL_API_KEY
-from menu.models import Week
+from menu.client import MenuUnavailable, fetch_week
+from menu.models import CAMPUSES, Week
 
 # Languages the menu API doesn't cover, mapped to DeepL's target code.
 TARGETS = {"uk": "UK"}
@@ -53,3 +54,17 @@ async def localize(week: Week, lang: str) -> Week:
         day: [dish._replace(en=known.get(dish.en, dish.en)) for dish in dishes]
         for day, dishes in week.days.items()
     })
+
+
+async def prewarm() -> None:
+    """Translate every campus's current menu ahead of time; already-cached names cost nothing."""
+    if not DEEPL_API_KEY:
+        return
+    for campus in CAMPUSES:
+        try:
+            week = await fetch_week(campus)
+        except MenuUnavailable:
+            continue
+        if week:
+            for lang in TARGETS:
+                await localize(week, lang)

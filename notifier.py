@@ -13,10 +13,12 @@ from formatting import format_day
 from keyboards.menu import day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import DAYS, Week, covers
-from menu.translate import localize
+from menu.translate import localize, prewarm
 
 # Telegram limit: ~30 messages per second.
 SEND_INTERVAL = 0.05
+# The kitchens publish the new week by Monday morning; dishes missed here get translated on first view.
+PREWARM_AT = (0, "07:00")
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +65,11 @@ async def run(bot: Bot) -> None:
         # +0.5s so an early wake-up can't read the previous minute.
         await asyncio.sleep(60 - time.time() % 60 + 0.5)
         now = datetime.now(TIMEZONE)
+        if (now.weekday(), now.strftime("%H:%M")) == PREWARM_AT:
+            try:
+                await prewarm()
+            except Exception:
+                log.exception("Translation prewarm failed")
         if now.weekday() >= 5:
             continue
         try:
