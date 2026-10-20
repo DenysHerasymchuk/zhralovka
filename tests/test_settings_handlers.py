@@ -38,10 +38,12 @@ class SettingsHandlersTest(HandlerTestCase):
         await settings.save_lang(cb)
         self.assertEqual((await db.get_user(42))[1], "uk")
         cb.message.delete.assert_not_awaited()
-        cb.message.answer.assert_not_awaited()
         edit = cb.message.edit_text.await_args
         self.assertIn("⚙️ <b>Налаштування</b>", edit.args[0])
         self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[1][0].text, TEXTS["uk"]["btn_change_lang"])
+        # The confirmation carries the bottom keyboard in the new language.
+        self.assertEqual(sent_text(cb.message), TEXTS["uk"]["lang_saved"])
+        self.assertEqual(sent_markup(cb.message).keyboard[0][0].text, "🍽 Сьогодні")
 
     async def test_unknown_language_is_ignored(self):
         cb = callback("lang:xx")

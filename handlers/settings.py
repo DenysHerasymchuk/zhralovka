@@ -94,6 +94,8 @@ async def save_lang(callback: CallbackQuery):
     await db.set_lang(callback.from_user.id, lang)
     log.info("User %s switched to %s", callback.from_user.id, lang)
     await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
+    # A new message is the only way to swap the bottom keyboard to the new language.
+    await callback.message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
     await callback.answer()
 
 

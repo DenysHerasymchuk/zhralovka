@@ -3,7 +3,7 @@ import unittest
 from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import db
 from menu.models import DAYS, Dish, Week
@@ -62,6 +62,10 @@ class HandlerTestCase(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         await db.init(Path(self.tmp.name) / "test.db")
+        # A real DEEPL_API_KEY in a developer's .env must not make tests call DeepL.
+        patcher = patch("menu.translate.DEEPL_API_KEY", "")
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     async def asyncTearDown(self):
         self.tmp.cleanup()

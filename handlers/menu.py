@@ -16,6 +16,7 @@ from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import Week, covers
+from menu.translate import localize
 
 router = Router()
 
@@ -31,7 +32,7 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
         return None, t(lang, "unavailable")
     if week is None:
         return None, t(lang, "no_menu", campus=campus)
-    return week, None
+    return await localize(week, lang), None
 
 
 @router.message(Command("today", "menu"))

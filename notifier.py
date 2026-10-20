@@ -12,7 +12,8 @@ from config import TIMEZONE
 from formatting import format_day
 from keyboards.menu import day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
-from menu.models import DAYS, covers
+from menu.models import DAYS, Week, covers
+from menu.translate import localize
 
 # Telegram limit: ~30 messages per second.
 SEND_INTERVAL = 0.05
@@ -38,11 +39,13 @@ async def send_due(bot: Bot, today: date, hhmm: str) -> int:
         if not week or not covers(week, today) or not week.days[DAYS[day]]:
             continue
 
+        localized: dict[str, Week] = {}
         for user_id, lang, prices in users:
+            if lang not in localized:
+                localized[lang] = await localize(week, lang)
+            text = format_day(localized[lang], day, lang, campus, prices)
             try:
-                await screens.send_to(
-                    bot, user_id, "daily", format_day(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang)
-                )
+                await screens.send_to(bot, user_id, "daily", text, reply_markup=day_nav_keyboard(day, lang))
                 sent += 1
             except TelegramForbiddenError:
                 await db.set_subscribed(user_id, False)

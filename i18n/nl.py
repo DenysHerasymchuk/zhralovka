@@ -46,6 +46,7 @@ TEXTS = {
     "daily_off": "uit",
     "campus_saved": "✅ <b>Campus ingesteld op {campus}</b>\nTik op 🍽 Vandaag om te zien wat er op het menu staat.",
     "pick_lang": "🌐 <b>Kies je taal</b>",
+    "lang_saved": "✅ Taal: Nederlands",
     "subscribed": (
         "🔔 <b>Dagelijks menu aan</b>\n"
         "Ik stuur je het menu om {time}. Tijdstip en dagen pas je aan via ⚙️ Instellingen, "

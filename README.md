@@ -56,7 +56,14 @@ The keyboard has three buttons: 🍽 Today, 📅 This week and ⚙️ Settings. 
 
 New users get Dutch or Ukrainian if their Telegram app is set to one of those. Everyone else starts in English. ⚙️ Settings → 🌐 Language (or `/language`) shows the three languages, and choosing one turns the same message back into Settings in that language.
 
-The menu service only publishes dish names in English and Dutch, so in Ukrainian the bot's own text, dates, categories and the `/prices` board are translated while the dish names stay English. The Ukrainian strings live in `i18n/uk.py` (including `CATEGORIES`) and `UK_NAMES` in `menu/prices.py`.
+The menu service only publishes dish names in English and Dutch. The bot's own text, dates, categories and the `/prices` board have Ukrainian versions in `i18n/uk.py` (including `CATEGORIES`) and `UK_NAMES` in `menu/prices.py`. Dish names are translated by DeepL when `DEEPL_API_KEY` is set:
+
+- Get a free key at [deepl.com/pro-api](https://www.deepl.com/pro-api). The free plan allows 500,000 characters a month; a week of dishes for one campus is about 2,000.
+- Put it in `.env`, or in Coolify's environment variables, as `DEEPL_API_KEY`. Free keys end in `:fx` and the bot picks the matching DeepL host.
+- Each dish name is translated once and stored in the `translations` table, so repeat dishes cost nothing and restarts don't re-translate.
+- Without a key, or if DeepL fails, dish names stay in English and the failure shows in the logs as `Dish translation to uk failed`.
+
+Picking a language also sends a short "✅ Language: …" message. Telegram only replaces the bottom keyboard (Today / This week / Settings) when a new message arrives, so that message is what switches it.
 
 ### Prices
 

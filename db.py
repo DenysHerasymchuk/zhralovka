@@ -28,6 +28,33 @@ async def init(path=DB_PATH) -> None:
         for column, definition in LATER_COLUMNS.items():
             if column not in existing:
                 await db.execute(f"ALTER TABLE users ADD COLUMN {column} {definition}")
+        await db.execute(
+            "CREATE TABLE IF NOT EXISTS translations ("
+            " source TEXT NOT NULL,"
+            " lang TEXT NOT NULL,"
+            " text TEXT NOT NULL,"
+            " PRIMARY KEY (source, lang))"
+        )
+        await db.commit()
+
+
+async def get_translations(sources: list[str], lang: str) -> dict[str, str]:
+    if not sources:
+        return {}
+    marks = ", ".join("?" * len(sources))
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            f"SELECT source, text FROM translations WHERE lang = ? AND source IN ({marks})", (lang, *sources)
+        ) as cursor:
+            return dict(await cursor.fetchall())
+
+
+async def save_translations(pairs: dict[str, str], lang: str) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.executemany(
+            "INSERT OR REPLACE INTO translations (source, lang, text) VALUES (?, ?, ?)",
+            [(source, lang, text) for source, text in pairs.items()],
+        )
         await db.commit()
 
 

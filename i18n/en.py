@@ -46,6 +46,7 @@ TEXTS = {
     "daily_off": "off",
     "campus_saved": "✅ <b>Campus set to {campus}</b>\nTap 🍽 Today to see what's for lunch.",
     "pick_lang": "🌐 <b>Choose your language</b>",
+    "lang_saved": "✅ Language: English",
     "subscribed": (
         "🔔 <b>Daily menu on</b>\n"
         "I'll send you the menu at {time}. Change the time and days in ⚙️ Settings, "
