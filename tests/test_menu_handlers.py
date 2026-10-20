@@ -5,7 +5,17 @@ import db
 from handlers import menu
 from i18n import TEXTS
 from menu.client import MenuUnavailable
-from tests.helpers import SATURDAY, TUESDAY, WEEK, HandlerTestCase, callback, message, sent_text
+from tests.helpers import (
+    SATURDAY,
+    TUESDAY,
+    WEEK,
+    HandlerTestCase,
+    callback,
+    message,
+    sent_markup,
+    sent_picture,
+    sent_text,
+)
 
 
 class MenuHandlersTest(HandlerTestCase):
@@ -13,6 +23,7 @@ class MenuHandlersTest(HandlerTestCase):
         msg = message()
         await menu.show_today(msg)
         self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])
+        self.assertEqual(sent_picture(msg), "location")
 
     async def test_dutch_user_gets_dutch(self):
         msg = message(language_code="nl")
@@ -26,6 +37,7 @@ class MenuHandlersTest(HandlerTestCase):
              patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
             await menu.show_today(msg)
         self.assertIn("<b>Tuesday</b>, 13 October", sent_text(msg))
+        self.assertEqual(sent_picture(msg), "today")
 
     async def test_today_on_weekend(self):
         await db.set_campus(42, "Geel")
@@ -41,8 +53,8 @@ class MenuHandlersTest(HandlerTestCase):
              patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
             await menu.show_week(msg)
         self.assertIn("<b>Monday</b>, 12 October", sent_text(msg))
-        buttons = msg.answer.await_args.kwargs["reply_markup"].inline_keyboard[0]
-        self.assertEqual(buttons[0].text, "🇺🇦")
+        self.assertEqual(sent_picture(msg), "thisweek")
+        self.assertEqual(sent_markup(msg).inline_keyboard[0][0].text, "🇺🇦")
 
     async def test_no_menu_published(self):
         await db.set_campus(42, "Lier")
@@ -72,7 +84,7 @@ class MenuHandlersTest(HandlerTestCase):
         with patch("handlers.menu.today", return_value=TUESDAY), \
              patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
             await menu.show_today(msg)
-        row = msg.answer.await_args.kwargs["reply_markup"].inline_keyboard[0]
+        row = sent_markup(msg).inline_keyboard[0]
         self.assertEqual([b.callback_data for b in row], ["nav:0", "nav:2"])
 
         cb = callback("nav:2")
@@ -100,13 +112,15 @@ class MenuHandlersTest(HandlerTestCase):
         self.assertNotIn("<", alert)
         self.assertTrue(alert.startswith("⚠️ Menu unavailable"))
 
-    async def test_link_previews_are_disabled(self):
+    async def test_switching_day_on_a_photo_keeps_the_picture(self):
         await db.set_campus(42, "Geel")
-        msg = message()
-        with patch("handlers.menu.today", return_value=TUESDAY), \
-             patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
-            await menu.show_week(msg)
-        self.assertTrue(msg.answer.await_args.kwargs["link_preview_options"].is_disabled)
+        cb = callback("nav:2")
+        cb.message.photo = ["a photo"]
+        cb.message.edit_caption = AsyncMock()
+        with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+            await menu.switch_day(cb)
+        self.assertIn("<b>Wednesday</b>", cb.message.edit_caption.await_args.kwargs["caption"])
+        cb.message.edit_text.assert_not_awaited()
 
     async def test_bad_day_is_ignored(self):
         await db.set_campus(42, "Geel")

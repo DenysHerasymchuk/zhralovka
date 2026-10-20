@@ -19,8 +19,10 @@ SATURDAY = date(2026, 10, 17)
 def message(text="", language_code="en"):
     msg = MagicMock()
     msg.text = text
+    msg.photo = None
     msg.from_user = SimpleNamespace(id=42, language_code=language_code, first_name="Sam")
     msg.answer = AsyncMock()
+    msg.answer_photo = AsyncMock()
     return msg
 
 
@@ -35,8 +37,25 @@ def callback(data):
     return cb
 
 
+def last_sent(msg) -> tuple[str, dict]:
+    """(text or caption, other kwargs) of the latest answer() or answer_photo()."""
+    name, args, kwargs = next(c for c in reversed(msg.mock_calls) if c[0] in ("answer", "answer_photo"))
+    kwargs = dict(kwargs)
+    if name == "answer_photo":
+        return kwargs.pop("caption"), {"picture": args[0], **kwargs}
+    return args[0], kwargs
+
+
 def sent_text(msg) -> str:
-    return msg.answer.await_args.args[0]
+    return last_sent(msg)[0]
+
+
+def sent_markup(msg):
+    return last_sent(msg)[1]["reply_markup"]
+
+
+def sent_picture(msg) -> str:
+    return Path(last_sent(msg)[1]["picture"].path).stem
 
 
 class HandlerTestCase(unittest.IsolatedAsyncioTestCase):

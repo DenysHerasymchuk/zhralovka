@@ -7,6 +7,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 import db
+import screens
 from handlers.common import profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, main_keyboard, settings_keyboard
@@ -32,19 +33,19 @@ async def settings_view(user_id: int, campus: str | None, lang: str) -> dict:
 @router.message(F.text.in_(all_langs("btn_settings")))
 async def show_settings(message: Message):
     campus, lang = await profile(message.from_user)
-    await message.answer(**await settings_view(message.from_user.id, campus, lang))
+    await screens.send(message, "settings", **await settings_view(message.from_user.id, campus, lang))
 
 
 @router.message(Command("campus"))
 async def ask_campus(message: Message):
     campus, lang = await profile(message.from_user)
-    await message.answer(t(lang, "pick_campus"), reply_markup=campus_keyboard(campus))
+    await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard(campus))
 
 
 @router.callback_query(F.data == "settings:campus")
 async def ask_campus_from_settings(callback: CallbackQuery):
     campus, lang = await profile(callback.from_user)
-    await callback.message.edit_text(t(lang, "pick_campus"), reply_markup=campus_keyboard(campus))
+    await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(campus), picture="location")
     await callback.answer()
 
 
@@ -70,7 +71,7 @@ async def toggle_lang(message: Message, user) -> None:
     await db.set_lang(user.id, lang)
     log.info("User %s switched to %s", user.id, lang)
     # A new message is the only way to swap the reply keyboard to the new language.
-    await message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
+    await screens.send(message, "language", t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
 
 
 @router.message(Command("language"))

@@ -7,9 +7,9 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
 
 import db
+import screens
 from config import TIMEZONE
 from formatting import format_day
-from handlers.menu import NO_PREVIEW
 from keyboards.menu import day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import DAYS
@@ -39,11 +39,8 @@ async def send_due(bot: Bot, day: int, hhmm: str) -> int:
 
         for user_id, lang in users:
             try:
-                await bot.send_message(
-                    user_id,
-                    format_day(week, day, lang, campus),
-                    reply_markup=day_nav_keyboard(day, lang),
-                    link_preview_options=NO_PREVIEW,
+                await screens.send_to(
+                    bot, user_id, "daily", format_day(week, day, lang, campus), reply_markup=day_nav_keyboard(day, lang)
                 )
                 sent += 1
             except TelegramForbiddenError:

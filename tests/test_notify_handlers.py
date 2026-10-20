@@ -49,9 +49,9 @@ class NotifyHandlersTest(HandlerTestCase):
         cb = callback("settings:subscribe")
         await notify.subscribe_from_settings(cb)
         self.assertTrue((await db.get_notify(42))[0])
-        edit = cb.message.edit_text.await_args.kwargs
-        self.assertIn("Daily menu: <b>on · 11:00", edit["text"])
-        self.assertEqual(edit["reply_markup"].inline_keyboard[2][0].text, TEXTS["en"]["btn_daily_off"])
+        edit = cb.message.edit_text.await_args
+        self.assertIn("Daily menu: <b>on · 11:00", edit.args[0])
+        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[2][0].text, TEXTS["en"]["btn_daily_off"])
 
     async def test_change_time_flow(self):
         state = AsyncMock()
@@ -96,7 +96,7 @@ class NotifyHandlersTest(HandlerTestCase):
     async def test_done_returns_to_settings(self):
         cb = callback("ndays:done")
         await notify.toggle_day(cb)
-        self.assertIn("⚙️ <b>Settings</b>", cb.message.edit_text.await_args.kwargs["text"])
+        self.assertIn("⚙️ <b>Settings</b>", cb.message.edit_text.await_args.args[0])
 
     async def test_bad_day_is_ignored(self):
         cb = callback("ndays:6")

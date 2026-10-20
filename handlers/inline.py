@@ -8,7 +8,8 @@ from aiogram.types import (
 
 from formatting import day_summary, day_title, format_day, pick_day
 from handlers.common import profile
-from handlers.menu import NO_PREVIEW, load_week, today
+from handlers.menu import load_week, today
+from screens import NO_PREVIEW
 from i18n import t
 from menu.models import CAMPUSES
 

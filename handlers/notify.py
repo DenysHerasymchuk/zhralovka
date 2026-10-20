@@ -8,6 +8,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 import db
+import screens
 from handlers.common import profile
 from handlers.settings import settings_view
 from i18n import t
@@ -46,7 +47,7 @@ async def toggle_subscription(user_id: int) -> tuple[bool, str]:
 async def subscribe(message: Message):
     campus, lang = await profile(message.from_user)
     if not campus:
-        await message.answer(t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
     subscribed, hhmm = await toggle_subscription(message.from_user.id)
     await message.answer(t(lang, "subscribed", time=hhmm) if subscribed else t(lang, "unsubscribed"))
@@ -56,11 +57,11 @@ async def subscribe(message: Message):
 async def subscribe_from_settings(callback: CallbackQuery):
     campus, lang = await profile(callback.from_user)
     if not campus:
-        await callback.message.edit_text(t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(), picture="location")
         await callback.answer()
         return
     await toggle_subscription(callback.from_user.id)
-    await callback.message.edit_text(**await settings_view(callback.from_user.id, campus, lang))
+    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
     await callback.answer()
 
 
@@ -96,7 +97,7 @@ async def save_time(message: Message, state: FSMContext):
 async def ask_days(callback: CallbackQuery):
     _, lang = await profile(callback.from_user)
     _, _, days = await db.get_notify(callback.from_user.id)
-    await callback.message.edit_text(t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
+    await screens.edit(callback.message, t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
     await callback.answer()
 
 
@@ -105,7 +106,7 @@ async def toggle_day(callback: CallbackQuery):
     campus, lang = await profile(callback.from_user)
     choice = callback.data.removeprefix("ndays:")
     if choice == "done":
-        await callback.message.edit_text(**await settings_view(callback.from_user.id, campus, lang))
+        await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
         await callback.answer()
         return
     if choice not in WEEKDAYS:
@@ -118,5 +119,5 @@ async def toggle_day(callback: CallbackQuery):
         await callback.answer(t(lang, "need_a_day"), show_alert=True)
         return
     await db.set_notify_days(callback.from_user.id, days)
-    await callback.message.edit_text(t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
+    await screens.edit(callback.message, t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
     await callback.answer()
