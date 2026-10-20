@@ -54,7 +54,7 @@ TEXTS = {
     ),
     "unsubscribed": "🔕 <b>Dagelijks menu uit</b>\nStuur /subscribe om het weer aan te zetten.",
     "ask_time": "⏰ <b>Wanneer moet ik het sturen?</b>\nStuur me een tijdstip, bv. 10:45.",
-    "bad_time": "🤔 Dat is geen tijdstip. Probeer 10:45, of stuur /cancel.",
+    "bad_time": "🤔 Dat is geen tijdstip, dus het oude blijft. Tik op ⏰ Ander tijdstip in ⚙️ Instellingen om het opnieuw te proberen, bv. 10:45.",
     "time_saved": "✅ <b>Dagelijks menu om {time}</b>",
     "time_cancelled": "Oké, het tijdstip blijft hetzelfde.",
     "pick_days": "📅 <b>Welke dagen?</b>\nTik op een dag om hem aan of uit te zetten.",

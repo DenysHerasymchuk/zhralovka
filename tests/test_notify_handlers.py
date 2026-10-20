@@ -53,16 +53,20 @@ class NotifyHandlersTest(HandlerTestCase):
         self.assertIn("Daily menu: <b>on · 11:00", edit.args[0])
         self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[3][0].text, TEXTS["en"]["btn_daily_off"])
 
+    async def test_bad_time_gives_up_waiting(self):
+        state = AsyncMock()
+        reply = message("lunch?")
+        await notify.save_time(reply, state)
+        state.clear.assert_awaited_once()  # later messages are handled normally again
+        self.assertEqual((await db.get_notify(42))[1], "11:00")
+        self.assertEqual(sent_text(reply), TEXTS["en"]["bad_time"])
+
     async def test_change_time_flow(self):
         state = AsyncMock()
         cb = callback("settings:time")
         await notify.ask_time(cb, state)
         state.set_state.assert_awaited_once_with(notify.NotifyForm.time)
         self.assertEqual(cb.message.answer.await_args.args[0], TEXTS["en"]["ask_time"])
-
-        await notify.save_time(message("lunch?"), state)
-        state.clear.assert_not_awaited()
-        self.assertEqual((await db.get_notify(42))[1], "11:00")
 
         reply = message("9.30")
         await notify.save_time(reply, state)

@@ -84,11 +84,12 @@ async def cancel_time(message: Message, state: FSMContext):
 async def save_time(message: Message, state: FSMContext):
     _, lang = await profile(message.from_user)
     hhmm = parse_time(message.text)
+    # One try only, so a forgotten prompt doesn't swallow the user's messages later on.
+    await state.clear()
     if not hhmm:
         await message.answer(t(lang, "bad_time"))
         return
     await db.set_notify_time(message.from_user.id, hhmm)
-    await state.clear()
     log.info("User %s set the daily menu to %s", message.from_user.id, hhmm)
     await message.answer(t(lang, "time_saved", time=hhmm))
 

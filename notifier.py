@@ -11,14 +11,12 @@ import screens
 from config import TIMEZONE
 from formatting import format_day
 from keyboards.menu import day_nav_keyboard
-from menu.client import MenuUnavailable, fetch_week
+from menu.client import NEW_WEEK_AT, MenuUnavailable, fetch_week
 from menu.models import DAYS, Week, covers
 from menu.translate import localize, prewarm
 
 # Telegram limit: ~30 messages per second.
 SEND_INTERVAL = 0.05
-# The kitchens publish the new week by Monday morning; dishes missed here get translated on first view.
-PREWARM_AT = (0, "07:00")
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +37,7 @@ async def send_due(bot: Bot, today: date, hhmm: str) -> int:
             log.warning("Daily menu skipped for %s: menu service unavailable", campus)
             continue
         if not week or not covers(week, today) or not week.days[DAYS[day]]:
+            log.info("Daily menu skipped for %s: no menu for today yet", campus)
             continue
 
         localized: dict[str, Week] = {}
@@ -65,7 +64,8 @@ async def run(bot: Bot) -> None:
         # +0.5s so an early wake-up can't read the previous minute.
         await asyncio.sleep(60 - time.time() % 60 + 0.5)
         now = datetime.now(TIMEZONE)
-        if (now.weekday(), now.strftime("%H:%M")) == PREWARM_AT:
+        # The new week is due Monday at NEW_WEEK_AT; translate it then. Later changes are translated on first view.
+        if now.weekday() == 0 and now.strftime("%H:%M") == NEW_WEEK_AT.strftime("%H:%M"):
             try:
                 await prewarm()
             except Exception:

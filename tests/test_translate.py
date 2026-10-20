@@ -19,9 +19,9 @@ def ukrainian(texts, target):
 class LocalizeTest(HandlerTestCase):
     async def asyncSetUp(self):
         await super().asyncSetUp()
-        patcher = patch("menu.translate.DEEPL_API_KEY", "secret:fx")
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        for patcher in (patch("menu.translate.DEEPL_API_KEY", "secret:fx"), patch("menu.translate._failed_at", 0.0)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
 
     async def test_other_languages_are_untouched(self):
         with patch("menu.translate._deepl", AsyncMock()) as deepl:
@@ -55,6 +55,20 @@ class LocalizeTest(HandlerTestCase):
             week = await translate.localize(WEEK, "uk")
         self.assertEqual(week.days["Monday"][0].en, "Leek soup")
         self.assertEqual(await db.get_translations(NAMES, "uk"), {})
+
+    async def test_after_a_failure_deepl_rests_for_half_an_hour(self):
+        error = aiohttp.ClientResponseError(None, (), status=403)
+        with patch("menu.translate._deepl", AsyncMock(side_effect=error)) as deepl:
+            await translate.localize(WEEK, "uk")
+            week = await translate.localize(WEEK, "uk")  # straight to English, no second request
+            deepl.assert_awaited_once()
+            self.assertEqual(week.days["Monday"][0].en, "Leek soup")
+
+            deepl.side_effect = ukrainian
+            with patch("menu.translate.time.time", return_value=translate._failed_at + translate.RETRY_AFTER + 1):
+                week = await translate.localize(WEEK, "uk")
+        self.assertEqual(deepl.await_count, 2)
+        self.assertEqual(week.days["Monday"][0].en, "UA Leek soup")
 
     async def test_prewarm_translates_every_campus_once(self):
         with patch("menu.translate.fetch_week", AsyncMock(return_value=WEEK)) as fetch, \

@@ -63,7 +63,7 @@ The menu service only publishes dish names in English and Dutch. The bot's own t
 - Get a free key at [deepl.com/pro-api](https://www.deepl.com/pro-api). The free plan allows 500,000 characters a month; a week of dishes for one campus is about 2,000.
 - Put it in `.env`, or in Coolify's environment variables, as `DEEPL_API_KEY`. Free keys end in `:fx` and the bot picks the matching DeepL host.
 - Each dish name is translated once and stored in the `translations` table, so repeat dishes cost nothing and restarts don't re-translate.
-- Every Monday at 07:00 (`PREWARM_AT` in `notifier.py`) the bot fetches each campus's new week and translates its dishes ahead of time. Anything published later, or changed mid-week, is translated the first time a Ukrainian user opens it.
+- Every Monday at 07:00 (`NEW_WEEK_AT` in `menu/client.py`, the same time the cached menu expires) the bot fetches each campus's new week and translates its dishes ahead of time. Anything published later, or changed mid-week, is translated the first time a Ukrainian user opens it.
 - Without a key, or if DeepL fails, dish names stay in English and the failure shows in the logs as `Dish translation to uk failed`.
 
 Picking a language also sends a short "✅ Language: …" message. Telegram only replaces the bottom keyboard (Today / This week / Settings) when a new message arrives, so that message is what switches it.

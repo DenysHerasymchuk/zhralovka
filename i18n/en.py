@@ -54,7 +54,7 @@ TEXTS = {
     ),
     "unsubscribed": "🔕 <b>Daily menu off</b>\nSend /subscribe to turn it back on.",
     "ask_time": "⏰ <b>When should I send it?</b>\nSend me a time, e.g. 10:45.",
-    "bad_time": "🤔 That's not a time. Try 10:45, or send /cancel.",
+    "bad_time": "🤔 That's not a time, so I kept the old one. Tap ⏰ Change time in ⚙️ Settings to try again, e.g. 10:45.",
     "time_saved": "✅ <b>Daily menu at {time}</b>",
     "time_cancelled": "OK, the time stays the same.",
     "pick_days": "📅 <b>Which days?</b>\nTap a day to turn it on or off.",
