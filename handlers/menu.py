@@ -87,11 +87,14 @@ async def switch_day(callback: CallbackQuery):
         await callback.answer(re.sub(r"<[^>]+>", "", problem), show_alert=True)
         return
 
+    if kind == "day":
+        markup, picture = days_keyboard(week.start, day, lang), None
+    else:
+        # Stepping off today in the Today view turns it into a week browser.
+        markup = day_nav_keyboard(day, lang)
+        picture = "today" if day == today().weekday() else "thisweek"
+
     # Tapping the day that's already open raises "message is not modified".
     with suppress(TelegramBadRequest):
-        await screens.edit(
-            callback.message,
-            format_day(week, day, lang, campus),
-            reply_markup=days_keyboard(week.start, day, lang) if kind == "day" else day_nav_keyboard(day, lang),
-        )
+        await screens.edit(callback.message, format_day(week, day, lang, campus), reply_markup=markup, picture=picture)
     await callback.answer()

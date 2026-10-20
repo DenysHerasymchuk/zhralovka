@@ -1,6 +1,6 @@
 import unittest
 from datetime import timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import db
 from handlers import menu
@@ -103,6 +103,17 @@ class MenuHandlersTest(HandlerTestCase):
         self.assertIn("<b>Wednesday</b>", edit.args[0])
         self.assertEqual([b.callback_data for b in edit.kwargs["reply_markup"].inline_keyboard[0]], ["nav:1", "nav:3"])
 
+    async def test_leaving_today_swaps_banner_to_this_week(self):
+        await db.set_campus(42, "Geel")
+        for target, banner in (("2", "thisweek"), ("1", "today")):  # Wednesday, then back to Tuesday
+            cb = callback(f"nav:{target}")
+            cb.message.photo = [MagicMock()]
+            cb.message.edit_media = AsyncMock()
+            with patch("handlers.menu.today", return_value=TUESDAY), \
+                 patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+                await menu.switch_day(cb)
+            self.assertEqual(cb.message.edit_media.await_args.args[0].media.path.stem, banner)
+
     async def test_monday_has_only_next_and_friday_only_previous(self):
         await db.set_campus(42, "Geel")
         for day, expected in (("0", ["nav:1"]), ("4", ["nav:3"])):
@@ -121,9 +132,9 @@ class MenuHandlersTest(HandlerTestCase):
         self.assertNotIn("<", alert)
         self.assertTrue(alert.startswith("⚠️ Menu unavailable"))
 
-    async def test_switching_day_on_a_photo_keeps_the_picture(self):
+    async def test_week_view_day_switch_keeps_the_picture(self):
         await db.set_campus(42, "Geel")
-        cb = callback("nav:2")
+        cb = callback("day:2")
         cb.message.photo = ["a photo"]
         cb.message.edit_caption = AsyncMock()
         with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
