@@ -22,9 +22,9 @@ log = logging.getLogger(__name__)
 
 async def send_due(bot: Bot, today: date, hhmm: str) -> int:
     day = today.weekday()
-    by_campus: dict[str, list[tuple[int, str]]] = {}
-    for user_id, campus, lang in await db.subscribers_due(day, hhmm):
-        by_campus.setdefault(campus, []).append((user_id, lang))
+    by_campus: dict[str, list[tuple[int, str, bool]]] = {}
+    for user_id, campus, lang, prices in await db.subscribers_due(day, hhmm):
+        by_campus.setdefault(campus, []).append((user_id, lang, bool(prices)))
     if not by_campus:
         return 0
 
@@ -38,10 +38,10 @@ async def send_due(bot: Bot, today: date, hhmm: str) -> int:
         if not week or not covers(week, today) or not week.days[DAYS[day]]:
             continue
 
-        for user_id, lang in users:
+        for user_id, lang, prices in users:
             try:
                 await screens.send_to(
-                    bot, user_id, "daily", format_day(week, day, lang, campus), reply_markup=day_nav_keyboard(day, lang)
+                    bot, user_id, "daily", format_day(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang)
                 )
                 sent += 1
             except TelegramForbiddenError:

@@ -8,6 +8,8 @@ TEXTS = {
     "btn_week": "📅 This week",
     "btn_prev_day": "⬅️ Previous day",
     "btn_next_day": "Next day ➡️",
+    "btn_show_prices": "💶 Show prices",
+    "btn_hide_prices": "💶 Hide prices",
     "btn_settings": "⚙️ Settings",
     "btn_change_campus": "📍 Change campus",
     "btn_change_lang": "🌐 Taal: Nederlands",
@@ -35,6 +37,7 @@ TEXTS = {
         "⚙️ <b>Settings</b>\n\n"
         "<blockquote>📍 Campus: <b>{campus}</b>\n"
         "🌐 Language: <b>English</b>\n"
+        "💶 Prices in menus: <b>{prices}</b>\n"
         "🔔 Daily menu: <b>{daily}</b></blockquote>"
     ),
     "no_campus": "not picked yet",
@@ -80,8 +83,9 @@ TEXTS = {
     # Help and command menu
     "help": (
         "❓ <b>What I can do</b>\n\n"
-        "<blockquote>/today  today's menu\n"
-        "/week or /menu  flip through Monday to Friday\n"
+        "<blockquote>/today or /menu  today's menu\n"
+        "/week  flip through Monday to Friday\n"
+        "/prices  cafeteria prices\n"
         "/subscribe  get the menu every weekday morning\n"
         "/campus  change your campus\n"
         "/language  switch to Dutch</blockquote>\n"
@@ -92,6 +96,7 @@ TEXTS = {
     ),
     "cmd_today": "Today's menu",
     "cmd_week": "This week's menu",
+    "cmd_prices": "Cafeteria prices",
     "cmd_subscribe": "Daily menu on/off",
     "cmd_campus": "Change campus",
     "cmd_language": "Taal: Nederlands",

@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 
 from i18n import day_name, month_name, t
 from menu.models import DAYS, Week, is_lunch
+from menu.prices import SECTIONS, category_price
 
 # Matched against the English category name; first hit wins.
 CATEGORY_EMOJI = (
@@ -35,12 +36,14 @@ def _pick(lang: str, en: str, nl: str) -> str:
     return (en if lang == "en" else nl) or en or nl
 
 
-def _dish_card(dish, lang: str) -> str:
+def _dish_card(dish, lang: str, prices: bool) -> str:
     category = _pick(lang, dish.category_en, dish.category_nl)
     name = _pick(lang, dish.en, dish.nl)
     photos = IMAGE_SEARCH_URL + urlencode({"tbm": "isch", "q": name})
+    price = category_price(dish.category_en) if prices else None
+    cost = f" · {_euro(price.student)}" if price else ""
     return (
-        f"<blockquote>{category_emoji(dish.category_en)} <b>{escape(category)}</b>\n"
+        f"<blockquote>{category_emoji(dish.category_en)} <b>{escape(category)}</b>{cost}\n"
         f'<a href="{escape(photos)}">{escape(name)}</a></blockquote>'
     )
 
@@ -63,7 +66,7 @@ def day_summary(week: Week, day: int, lang: str) -> str:
     return " · ".join(_pick(lang, d.en, d.nl) for d in _sorted_dishes(week, day))
 
 
-def format_day(week: Week, day: int, lang: str, campus: str) -> str:
+def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str:
     place = campus if week.kitchen in ("", campus) else f"{campus}, {week.kitchen}"
     lines = [
         f"<b>{day_name(lang, day).capitalize()}</b>, {_date_label(week, day, lang)}",
@@ -76,5 +79,21 @@ def format_day(week: Week, day: int, lang: str, campus: str) -> str:
         lines.append(t(lang, "no_dishes", day=day_name(lang, day)))
         return "\n".join(lines)
 
-    lines += (_dish_card(dish, lang) for dish in dishes)
+    lines += (_dish_card(dish, lang, prices) for dish in dishes)
+    return "\n".join(lines)
+
+
+def _euro(cents: int) -> str:
+    return f"€{cents // 100},{cents % 100:02}"
+
+
+def _price_card(item, lang: str) -> str:
+    prices = f"🎓 {_euro(item.student)} · 🏢 {_euro(item.intern)} · 💳 {_euro(item.bancontact)}"
+    return f"<blockquote><b>{escape(_pick(lang, item.en, item.nl))}</b>\n{prices}</blockquote>"
+
+
+def format_prices(section: int, lang: str) -> str:
+    current = SECTIONS[section]
+    lines = [f"<b>{current.emoji} {escape(_pick(lang, current.en, current.nl))}</b>", ""]
+    lines += (_price_card(item, lang) for item in current.items)
     return "\n".join(lines)

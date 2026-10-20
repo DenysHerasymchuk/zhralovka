@@ -39,6 +39,7 @@ class SendDueTest(HandlerTestCase):
         self.assertIn("<b>Dinsdag</b>", dutch.kwargs["caption"])
         self.assertEqual(dutch.args[1].path.stem, "daily")
         self.assertEqual([b.callback_data for b in dutch.kwargs["reply_markup"].inline_keyboard[0]], ["nav:0", "nav:2"])
+        self.assertNotIn("€", dutch.kwargs["caption"])
 
     async def test_only_users_due_this_minute_and_day(self):
         await self.subscribe(1, "Geel", hhmm="09:30")

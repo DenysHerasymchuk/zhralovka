@@ -9,6 +9,7 @@ from aiogram.types import (
 
 from i18n import day_name, t
 from menu.models import CAMPUSES
+from menu.prices import SECTIONS
 
 
 def main_keyboard(lang: str) -> ReplyKeyboardMarkup:
@@ -56,11 +57,13 @@ def day_nav_keyboard(day: int, lang: str) -> InlineKeyboardMarkup | None:
     return InlineKeyboardMarkup(inline_keyboard=[buttons]) if buttons else None
 
 
-def settings_keyboard(lang: str, subscribed: bool) -> InlineKeyboardMarkup:
+def settings_keyboard(lang: str, subscribed: bool, show_prices: bool) -> InlineKeyboardMarkup:
     daily = t(lang, "btn_daily_off" if subscribed else "btn_daily_on")
+    prices = t(lang, "btn_hide_prices" if show_prices else "btn_show_prices")
     rows = [
         [InlineKeyboardButton(text=t(lang, "btn_change_campus"), callback_data="settings:campus")],
         [InlineKeyboardButton(text=t(lang, "btn_change_lang"), callback_data="settings:lang")],
+        [InlineKeyboardButton(text=prices, callback_data="settings:prices")],
         [InlineKeyboardButton(text=daily, callback_data="settings:subscribe")],
     ]
     if subscribed:
@@ -69,6 +72,14 @@ def settings_keyboard(lang: str, subscribed: bool) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text=t(lang, "btn_change_days"), callback_data="settings:days"),
         ])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def prices_keyboard(selected: int) -> InlineKeyboardMarkup:
+    buttons = [
+        InlineKeyboardButton(text=f"✅ {s.emoji}" if i == selected else s.emoji, callback_data=f"prices:{i}")
+        for i, s in enumerate(SECTIONS)
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
 def notify_days_keyboard(days: str, lang: str) -> InlineKeyboardMarkup:

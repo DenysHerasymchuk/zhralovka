@@ -7,6 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
+import db
 import screens
 from config import TIMEZONE
 from formatting import format_day, pick_day
@@ -33,7 +34,7 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
     return week, None
 
 
-@router.message(Command("today"))
+@router.message(Command("today", "menu"))
 @router.message(F.text.in_(all_langs("btn_today")))
 async def show_today(message: Message):
     campus, lang = await profile(message.from_user)
@@ -53,10 +54,11 @@ async def show_today(message: Message):
     if problem:
         await message.answer(problem)
         return
-    await screens.send(message, "today", format_day(week, day, lang, campus), reply_markup=day_nav_keyboard(day, lang))
+    prices = await db.get_show_prices(message.from_user.id)
+    await screens.send(message, "today", format_day(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang))
 
 
-@router.message(Command("week", "menu"))
+@router.message(Command("week"))
 @router.message(F.text.in_(all_langs("btn_week")))
 async def show_week(message: Message):
     campus, lang = await profile(message.from_user)
@@ -70,7 +72,10 @@ async def show_week(message: Message):
         return
 
     day, _ = pick_day(today())
-    await screens.send(message, "thisweek", format_day(week, day, lang, campus), reply_markup=days_keyboard(week.start, day, lang))
+    prices = await db.get_show_prices(message.from_user.id)
+    await screens.send(
+        message, "thisweek", format_day(week, day, lang, campus, prices), reply_markup=days_keyboard(week.start, day, lang)
+    )
 
 
 @router.callback_query(F.data.startswith(("day:", "nav:")))
@@ -81,6 +86,7 @@ async def switch_day(callback: CallbackQuery):
         await callback.answer()
         return
     day = int(day)
+    prices = await db.get_show_prices(callback.from_user.id)
 
     week, problem = await load_week(campus, lang)
     if problem:
@@ -96,5 +102,5 @@ async def switch_day(callback: CallbackQuery):
 
     # Tapping the day that's already open raises "message is not modified".
     with suppress(TelegramBadRequest):
-        await screens.edit(callback.message, format_day(week, day, lang, campus), reply_markup=markup, picture=picture)
+        await screens.edit(callback.message, format_day(week, day, lang, campus, prices), reply_markup=markup, picture=picture)
     await callback.answer()

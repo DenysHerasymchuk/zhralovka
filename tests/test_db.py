@@ -50,7 +50,7 @@ class DbTest(unittest.IsolatedAsyncioTestCase):
         await db.set_subscribed(1, True)
         await db.set_notify_time(1, "09:30")
         await db.set_notify_days(1, "024")
-        self.assertEqual(await db.subscribers_due(2, "09:30"), [(1, "Geel", "en")])
+        self.assertEqual(await db.subscribers_due(2, "09:30"), [(1, "Geel", "en", 0)])
         self.assertEqual(await db.subscribers_due(1, "09:30"), [])  # Tuesday is off
         self.assertEqual(await db.subscribers_due(2, "11:00"), [])
 
@@ -68,7 +68,13 @@ class DbTest(unittest.IsolatedAsyncioTestCase):
         await db.init(path)
         self.assertEqual(await db.get_user(7), ("Lier", "nl"))
         await db.set_subscribed(7, True)
-        self.assertEqual(await db.subscribers_due(0, "11:00"), [(7, "Lier", "nl")])
+        self.assertEqual(await db.subscribers_due(0, "11:00"), [(7, "Lier", "nl", 0)])
+        self.assertFalse(await db.get_show_prices(7))
+
+    async def test_show_prices_round_trip(self):
+        self.assertFalse(await db.get_show_prices(1))
+        await db.set_show_prices(1, True)
+        self.assertTrue(await db.get_show_prices(1))
 
 
 if __name__ == "__main__":

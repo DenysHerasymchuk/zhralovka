@@ -4,7 +4,7 @@ from aiogram import Bot
 from aiogram.types import FSInputFile, InputMediaPhoto, LinkPreviewOptions, Message
 
 PICTURES_DIR = Path(__file__).parent / "src" / "pictures"
-PICTURES = ("hero", "location", "today", "thisweek", "daily", "settings", "language", "share")
+PICTURES = ("hero", "location", "today", "thisweek", "daily", "settings", "share", "menu")
 
 # Dish names are links; without this Telegram previews the first one.
 NO_PREVIEW = LinkPreviewOptions(is_disabled=True)

@@ -46,14 +46,21 @@ The keyboard has three buttons: 🍽 Today, 📅 This week and ⚙️ Settings. 
 | Command      | What it does                                |
 |--------------|---------------------------------------------|
 | `/start`     | Welcome message, asks for your campus       |
-| `/today`     | Today's menu                                |
-| `/week`      | This week, Monday to Friday (alias `/menu`) |
+| `/today`     | Today's menu (alias `/menu`)                |
+| `/week`      | This week, Monday to Friday                 |
+| `/prices`    | Cafeteria prices (alias `/price`)           |
 | `/subscribe` | Daily menu on or off                        |
 | `/campus`    | Pick a different campus                     |
 | `/language`  | Switch between English and Dutch            |
 | `/help`      | List of commands                            |
 
 New users get Dutch if their Telegram app is set to Dutch. Everyone else starts in English.
+
+### Prices
+
+`/prices` shows the cafeteria's price board, one section at a time (🥪 sandwiches, 🍲 hot meals, 🥗 cold dishes, 🍰 desserts, 🥤 drinks). Every item lists three prices: 🎓 paying with a student or staff card, 🏢 with a TM intern card, and 💳 with Bancontact. The menu API has no prices, so the board lives in `menu/prices.py`, copied from the printed board. Edit that file when prices change; prices are in cents.
+
+In ⚙️ Settings, 💶 Show prices turns on the student price after each category name (`🍽 Lunch of the day · €5,40`) in 🍽 Today, 📅 This week and the daily menu. It's off by default, saved per user, and never applies to menus shared with @zhralovkabot. `CATEGORY_PRICES` in the same file maps each menu category to a board row: soup to soup, lunch of the day and the suggestion menu to the daily special, salad to the salad bar menu, sandwich of today to the baguette snack, and snack to snack + fries.
 
 ### Daily menu
 
@@ -92,6 +99,7 @@ config.py            settings from the environment (.env)
 db.py                SQLite storage for campus and language
 menu/models.py       Dish and Week, parsing the menu API response
 menu/client.py       fetches the menu API, caches each campus for 30 minutes
+menu/prices.py       the cafeteria price board, edited by hand
 i18n/en.py, nl.py    all bot text, one file per language
 i18n/__init__.py     text lookup and language detection
 formatting.py        turns a day's menu into a message

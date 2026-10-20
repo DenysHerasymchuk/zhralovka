@@ -9,6 +9,7 @@ LATER_COLUMNS = {
     "subscribed": "INTEGER NOT NULL DEFAULT 0",
     "notify_time": f"TEXT NOT NULL DEFAULT '{DEFAULT_TIME}'",
     "notify_days": f"TEXT NOT NULL DEFAULT '{DEFAULT_DAYS}'",
+    "show_prices": "INTEGER NOT NULL DEFAULT 0",
 }
 
 
@@ -69,6 +70,17 @@ async def set_subscribed(user_id: int, subscribed: bool) -> None:
     await _set(user_id, "subscribed", int(subscribed))
 
 
+async def set_show_prices(user_id: int, show: bool) -> None:
+    await _set(user_id, "show_prices", int(show))
+
+
+async def get_show_prices(user_id: int) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT show_prices FROM users WHERE user_id = ?", (user_id,)) as cursor:
+            row = await cursor.fetchone()
+    return bool(row and row[0])
+
+
 async def set_notify_time(user_id: int, hhmm: str) -> None:
     await _set(user_id, "notify_time", hhmm)
 
@@ -89,11 +101,11 @@ async def get_notify(user_id: int) -> tuple[bool, str, str]:
     return bool(row[0]), row[1], row[2]
 
 
-async def subscribers_due(weekday: int, hhmm: str) -> list[tuple[int, str, str]]:
-    """(user_id, campus, lang) for subscribers due at this weekday and minute."""
+async def subscribers_due(weekday: int, hhmm: str) -> list[tuple[int, str, str, int]]:
+    """(user_id, campus, lang, show_prices) for subscribers due at this weekday and minute."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT user_id, campus, lang FROM users"
+            "SELECT user_id, campus, lang, show_prices FROM users"
             " WHERE subscribed = 1 AND campus IS NOT NULL"
             " AND notify_time = ? AND instr(notify_days, ?) > 0",
             (hhmm, str(weekday)),

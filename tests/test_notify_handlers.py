@@ -51,7 +51,7 @@ class NotifyHandlersTest(HandlerTestCase):
         self.assertTrue((await db.get_notify(42))[0])
         edit = cb.message.edit_text.await_args
         self.assertIn("Daily menu: <b>on · 11:00", edit.args[0])
-        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[2][0].text, TEXTS["en"]["btn_daily_off"])
+        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[3][0].text, TEXTS["en"]["btn_daily_off"])
 
     async def test_change_time_flow(self):
         state = AsyncMock()

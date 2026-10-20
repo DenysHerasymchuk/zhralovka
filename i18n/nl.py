@@ -8,6 +8,8 @@ TEXTS = {
     "btn_week": "📅 Deze week",
     "btn_prev_day": "⬅️ Vorige dag",
     "btn_next_day": "Volgende dag ➡️",
+    "btn_show_prices": "💶 Toon prijzen",
+    "btn_hide_prices": "💶 Verberg prijzen",
     "btn_settings": "⚙️ Instellingen",
     "btn_change_campus": "📍 Andere campus",
     "btn_change_lang": "🌐 Language: English",
@@ -35,6 +37,7 @@ TEXTS = {
         "⚙️ <b>Instellingen</b>\n\n"
         "<blockquote>📍 Campus: <b>{campus}</b>\n"
         "🌐 Taal: <b>Nederlands</b>\n"
+        "💶 Prijzen in menu's: <b>{prices}</b>\n"
         "🔔 Dagelijks menu: <b>{daily}</b></blockquote>"
     ),
     "no_campus": "nog niet gekozen",
@@ -81,8 +84,9 @@ TEXTS = {
     # Help and command menu
     "help": (
         "❓ <b>Wat ik kan</b>\n\n"
-        "<blockquote>/today  menu van vandaag\n"
-        "/week of /menu  blader door maandag tot vrijdag\n"
+        "<blockquote>/today of /menu  menu van vandaag\n"
+        "/week  blader door maandag tot vrijdag\n"
+        "/prices  prijzen in de cafetaria\n"
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
         "/campus  kies een andere campus\n"
         "/language  wissel naar Engels</blockquote>\n"
@@ -93,6 +97,7 @@ TEXTS = {
     ),
     "cmd_today": "Menu van vandaag",
     "cmd_week": "Menu van deze week",
+    "cmd_prices": "Prijzen in de cafetaria",
     "cmd_subscribe": "Dagelijks menu aan/uit",
     "cmd_campus": "Andere campus",
     "cmd_language": "Language: English",

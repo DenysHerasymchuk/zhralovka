@@ -23,10 +23,12 @@ def days_label(days: str, lang: str) -> str:
 
 async def settings_view(user_id: int, campus: str | None, lang: str) -> dict:
     subscribed, hhmm, days = await db.get_notify(user_id)
+    show_prices = await db.get_show_prices(user_id)
     daily = f"{t(lang, 'daily_on')} · {hhmm} · {days_label(days, lang)}" if subscribed else t(lang, "daily_off")
+    prices = t(lang, "daily_on" if show_prices else "daily_off")
     return {
-        "text": t(lang, "settings", campus=campus or t(lang, "no_campus"), daily=daily),
-        "reply_markup": settings_keyboard(lang, subscribed),
+        "text": t(lang, "settings", campus=campus or t(lang, "no_campus"), daily=daily, prices=prices),
+        "reply_markup": settings_keyboard(lang, subscribed, show_prices),
     }
 
 
@@ -56,32 +58,47 @@ async def save_campus(callback: CallbackQuery):
         await callback.answer()
         return
 
-    _, lang = await profile(callback.from_user)
+    previous, lang = await profile(callback.from_user)
     await db.set_campus(callback.from_user.id, campus)
     log.info("User %s picked campus %s", callback.from_user.id, campus)
-    with suppress(TelegramBadRequest):
-        await callback.message.delete()
-    await callback.message.answer(t(lang, "campus_saved", campus=campus), reply_markup=main_keyboard(lang))
+    if previous:
+        await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang), picture="settings")
+    else:
+        # A first-time user has no bottom keyboard yet, and only a new message can add one.
+        with suppress(TelegramBadRequest):
+            await callback.message.delete()
+        await callback.message.answer(t(lang, "campus_saved", campus=campus), reply_markup=main_keyboard(lang))
     await callback.answer()
 
 
-async def toggle_lang(message: Message, user) -> None:
+async def toggle_lang(user) -> str:
     _, lang = await profile(user)
     lang = "nl" if lang == "en" else "en"
     await db.set_lang(user.id, lang)
     log.info("User %s switched to %s", user.id, lang)
-    # A new message is the only way to swap the reply keyboard to the new language.
-    await screens.send(message, "language", t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
+    return lang
 
 
 @router.message(Command("language"))
 async def switch_lang(message: Message):
-    await toggle_lang(message, message.from_user)
+    lang = await toggle_lang(message.from_user)
+    # A new message is the only way to swap the bottom keyboard to the new language.
+    await message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
+
+
+@router.callback_query(F.data == "settings:prices")
+async def toggle_prices(callback: CallbackQuery):
+    campus, lang = await profile(callback.from_user)
+    show = not await db.get_show_prices(callback.from_user.id)
+    await db.set_show_prices(callback.from_user.id, show)
+    log.info("User %s turned menu prices %s", callback.from_user.id, "on" if show else "off")
+    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
+    await callback.answer()
 
 
 @router.callback_query(F.data == "settings:lang")
 async def switch_lang_from_settings(callback: CallbackQuery):
-    with suppress(TelegramBadRequest):
-        await callback.message.delete()
-    await toggle_lang(callback.message, callback.from_user)
+    lang = await toggle_lang(callback.from_user)
+    campus, _ = await profile(callback.from_user)
+    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
     await callback.answer()

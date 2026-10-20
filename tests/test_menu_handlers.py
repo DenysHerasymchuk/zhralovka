@@ -114,6 +114,23 @@ class MenuHandlersTest(HandlerTestCase):
                 await menu.switch_day(cb)
             self.assertEqual(cb.message.edit_media.await_args.args[0].media.path.stem, banner)
 
+    async def test_prices_follow_the_setting(self):
+        await db.set_campus(42, "Geel")
+        msg = message()
+        with patch("handlers.menu.today", return_value=TUESDAY), \
+             patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+            await menu.show_today(msg)
+            self.assertNotIn("€", sent_text(msg))
+            self.assertEqual(len(sent_markup(msg).inline_keyboard), 1)  # no toggle under the menu
+
+            await db.set_show_prices(42, True)
+            await menu.show_week(msg)
+            self.assertIn("<b>Lunch of the day</b> · €5,40", sent_text(msg))
+
+            cb = callback("nav:2")
+            await menu.switch_day(cb)
+        self.assertIn("· €5,40", cb.message.edit_text.await_args.args[0])
+
     async def test_monday_has_only_next_and_friday_only_previous(self):
         await db.set_campus(42, "Geel")
         for day, expected in (("0", ["nav:1"]), ("4", ["nav:3"])):

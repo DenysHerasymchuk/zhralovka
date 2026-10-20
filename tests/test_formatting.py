@@ -37,6 +37,22 @@ class FormatDayTest(unittest.TestCase):
         text = format_day(week(dish), 1, "nl", "Geel")
         self.assertIn("🍽 <b>Lunch of the day</b>\n<a href=\"https://www.google.com/search?tbm=isch&amp;q=Tikka+masala\">Tikka masala</a>", text)
 
+    def test_each_category_gets_its_student_price(self):
+        cases = {
+            "Soup": "€1,25", "Lunch of the day": "€5,40", "Suggestion menu": "€5,40",
+            "Salad": "€5,40", "Sandwich of today": "€5,45", "Snack": "€6,00",
+        }
+        for category, price in cases.items():
+            text = format_day(week(Dish(category, "", "Dish", "")), 1, "en", "Geel", prices=True)
+            self.assertIn(f"<b>{category}</b> · {price}\n", text)
+
+    def test_prices_hidden_by_default(self):
+        self.assertNotIn("€", format_day(week(SOUP), 1, "en", "Geel"))
+
+    def test_unknown_category_has_no_price(self):
+        text = format_day(week(Dish("Chef's special", "", "Dish", "")), 1, "en", "Geel", prices=True)
+        self.assertIn("<b>Chef&#x27;s special</b>\n", text)
+
     def test_lunch_goes_first(self):
         lunch = Dish("Lunch of the day", "Lunch van de dag", "Poké Bowl", "Poké Bowl")
         salad = Dish("Salad", "Salade", "Salad bar", "Salad bar")
