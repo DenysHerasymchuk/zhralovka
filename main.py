@@ -8,6 +8,7 @@ from aiogram.types import BotCommand
 import db
 from config import API_TOKEN, LOG_LEVEL
 from handlers.fallback import router as fallback_router
+from handlers.inline import router as inline_router
 from handlers.menu import router as menu_router
 from handlers.settings import router as settings_router
 from handlers.start import router as start_router
@@ -21,7 +22,13 @@ log = logging.getLogger("bot")
 dp = Dispatcher()
 dp.update.outer_middleware(log_updates)
 # fallback_router catches every message, so it goes last.
-dp.include_routers(start_router, settings_router, menu_router, fallback_router)
+dp.include_routers(
+    start_router,
+    settings_router,
+    menu_router,
+    inline_router,
+    fallback_router,
+)
 
 
 async def set_commands(bot: Bot) -> None:

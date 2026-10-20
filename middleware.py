@@ -2,7 +2,7 @@ import logging
 import time
 from typing import Any, Awaitable, Callable
 
-from aiogram.types import CallbackQuery, Message, TelegramObject, Update
+from aiogram.types import CallbackQuery, InlineQuery, Message, TelegramObject, Update
 
 log = logging.getLogger("bot.updates")
 
@@ -15,6 +15,8 @@ def _describe(event: TelegramObject) -> str:
         return f"message {text[:MAX_TEXT]!r}"
     if isinstance(event, CallbackQuery):
         return f"callback {event.data!r}"
+    if isinstance(event, InlineQuery):
+        return f"inline {event.query[:MAX_TEXT]!r}"
     return type(event).__name__
 
 

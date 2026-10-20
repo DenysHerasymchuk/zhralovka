@@ -56,6 +56,12 @@ New users get Dutch if their Telegram app is set to Dutch. Everyone else starts 
 
 Each dish name is a link. Tapping it opens a Google Images search for that exact name in the browser.
 
+### Inline mode
+
+Type `@<bot username>` in any chat to get the menus from today through Friday for your campus. Tap one to send it into that chat. Add a campus name (`@<bot> lier`) to share another campus. Users without a campus get a button that opens the bot to pick one.
+
+Turn it on once in @BotFather: `/setinline`, pick the bot, and set a placeholder such as `campus (optional)`.
+
 ## Layout
 
 ```
@@ -69,7 +75,7 @@ i18n/__init__.py     text lookup and language detection
 formatting.py        turns a day's menu into a message
 middleware.py        logs every update with user, action and duration
 keyboards/menu.py    reply and inline keyboards
-handlers/            start, menu, settings and fallback handlers; common.py has the user lookup
+handlers/            start, menu, settings, inline and fallback handlers; common.py has the user lookup
 tests/               unit tests, network mocked
 ```
 

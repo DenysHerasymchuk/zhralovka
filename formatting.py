@@ -45,20 +45,36 @@ def _dish_card(dish, lang: str) -> str:
     )
 
 
-def format_day(week: Week, day: int, lang: str, campus: str) -> str:
+def _sorted_dishes(week: Week, day: int) -> list:
+    # Lunch first; sorted() is stable, so the rest keep the kitchen's order.
+    return sorted(week.days[DAYS[day]], key=lambda d: not is_lunch(d))
+
+
+def _date_label(week: Week, day: int, lang: str) -> str:
     when = week.start + timedelta(days=day)
+    return f"{when.day} {month_name(lang, when.month)}"
+
+
+def day_title(week: Week, day: int, lang: str) -> str:
+    return f"{day_name(lang, day).capitalize()}, {_date_label(week, day, lang)}"
+
+
+def day_summary(week: Week, day: int, lang: str) -> str:
+    return " · ".join(_pick(lang, d.en, d.nl) for d in _sorted_dishes(week, day))
+
+
+def format_day(week: Week, day: int, lang: str, campus: str) -> str:
     place = campus if week.kitchen in ("", campus) else f"{campus}, {week.kitchen}"
     lines = [
-        f"<b>{day_name(lang, day).capitalize()}</b>, {when.day} {month_name(lang, when.month)}",
+        f"<b>{day_name(lang, day).capitalize()}</b>, {_date_label(week, day, lang)}",
         f"📍 {escape(place)}",
         "",
     ]
 
-    dishes = week.days[DAYS[day]]
+    dishes = _sorted_dishes(week, day)
     if not dishes:
         lines.append(t(lang, "no_dishes", day=day_name(lang, day)))
         return "\n".join(lines)
 
-    # Lunch first; sorted() is stable, so the rest keep the kitchen's order.
-    lines += (_dish_card(dish, lang) for dish in sorted(dishes, key=lambda d: not is_lunch(d)))
+    lines += (_dish_card(dish, lang) for dish in dishes)
     return "\n".join(lines)

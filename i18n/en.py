@@ -46,6 +46,10 @@ TEXTS = {
     ),
     "no_dishes": "<i>Nothing is listed for {day}. Probably a day off.</i>",
 
+    # Inline mode
+    "inline_pick_campus": "📍 Pick your campus first",
+    "inline_no_dishes": "Nothing listed",
+
     # Errors
     "unavailable": (
         "⚠️ <b>Menu unavailable</b>\n"
@@ -60,6 +64,8 @@ TEXTS = {
         "/week or /menu  flip through Monday to Friday\n"
         "/campus  change your campus\n"
         "/language  switch to Dutch</blockquote>\n"
+        "To share a menu, type my @username in any chat and pick a day. "
+        "Add a campus name to see another campus.\n\n"
         "Menus come straight from the Thomas More kitchens. If something "
         "looks off, blame the kitchen."
     ),
