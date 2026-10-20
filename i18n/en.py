@@ -13,6 +13,9 @@ TEXTS = {
     "btn_change_lang": "🌐 Taal: Nederlands",
     "btn_daily_on": "🔔 Send me the menu daily",
     "btn_daily_off": "🔕 Stop the daily menu",
+    "btn_change_time": "⏰ Change time",
+    "btn_change_days": "📅 Change days",
+    "btn_done": "✅ Done",
     "placeholder": "Hungry?",
 
     # Onboarding
@@ -39,8 +42,18 @@ TEXTS = {
     "daily_off": "off",
     "campus_saved": "✅ <b>Campus set to {campus}</b>\nTap 🍽 Today to see what's for lunch.",
     "lang_saved": "✅ <b>Switched to English</b>",
-    "subscribed": "🔔 <b>Daily menu on</b>\nI'll send you the menu every weekday at {time}. Send /subscribe again to stop.",
+    "subscribed": (
+        "🔔 <b>Daily menu on</b>\n"
+        "I'll send you the menu at {time}. Change the time and days in ⚙️ Settings, "
+        "or send /subscribe again to stop."
+    ),
     "unsubscribed": "🔕 <b>Daily menu off</b>\nSend /subscribe to turn it back on.",
+    "ask_time": "⏰ <b>When should I send it?</b>\nSend me a time, e.g. 10:45.",
+    "bad_time": "🤔 That's not a time. Try 10:45, or send /cancel.",
+    "time_saved": "✅ <b>Daily menu at {time}</b>",
+    "time_cancelled": "OK, the time stays the same.",
+    "pick_days": "📅 <b>Which days?</b>\nTap a day to turn it on or off.",
+    "need_a_day": "Pick at least one day. To stop the daily menu, use 🔕 in Settings.",
 
     # Menu
     "weekend": (

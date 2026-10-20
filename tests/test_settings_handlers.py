@@ -25,30 +25,24 @@ class SettingsHandlersTest(HandlerTestCase):
         await settings.switch_lang(msg)
         self.assertEqual((await db.get_user(42))[1], "en")
 
-    async def test_subscribe_toggles(self):
+    async def test_settings_show_daily_menu_details(self):
         await db.set_campus(42, "Geel")
+        await db.set_subscribed(42, True)
+        await db.set_notify_time(42, "10:45")
+        await db.set_notify_days(42, "024")
         msg = message()
-        await settings.subscribe(msg)
-        self.assertTrue(await db.is_subscribed(42))
-        self.assertIn("every weekday at 11:00", sent_text(msg))
-        await settings.subscribe(msg)
-        self.assertFalse(await db.is_subscribed(42))
-        self.assertEqual(sent_text(msg), TEXTS["en"]["unsubscribed"])
+        await settings.show_settings(msg)
+        sent = msg.answer.await_args.kwargs
+        self.assertIn("Daily menu: <b>on · 10:45 · Mo, We, Fr</b>", sent["text"])
+        rows = sent["reply_markup"].inline_keyboard
+        self.assertEqual([b.callback_data for b in rows[3]], ["settings:time", "settings:days"])
 
-    async def test_subscribe_without_campus_asks_for_one(self):
+    async def test_settings_hide_time_and_days_when_off(self):
         msg = message()
-        await settings.subscribe(msg)
-        self.assertFalse(await db.is_subscribed(42))
-        self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])
-
-    async def test_settings_button_toggles_and_redraws(self):
-        await db.set_campus(42, "Geel")
-        cb = callback("settings:subscribe")
-        await settings.subscribe_from_settings(cb)
-        self.assertTrue(await db.is_subscribed(42))
-        edit = cb.message.edit_text.await_args.kwargs
-        self.assertIn("Daily menu: <b>on</b>", edit["text"])
-        self.assertEqual(edit["reply_markup"].inline_keyboard[2][0].text, TEXTS["en"]["btn_daily_off"])
+        await settings.show_settings(msg)
+        sent = msg.answer.await_args.kwargs
+        self.assertIn("Daily menu: <b>off</b>", sent["text"])
+        self.assertEqual(len(sent["reply_markup"].inline_keyboard), 3)
 
 
 if __name__ == "__main__":

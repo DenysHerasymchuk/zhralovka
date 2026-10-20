@@ -2,6 +2,13 @@ import aiosqlite
 
 from config import DB_PATH
 
+# Added after the first release; init() adds any that an older database lacks.
+LATER_COLUMNS = {
+    "subscribed": "INTEGER NOT NULL DEFAULT 0",
+    "notify_time": "TEXT NOT NULL DEFAULT '11:00'",
+    "notify_days": "TEXT NOT NULL DEFAULT '01234'",
+}
+
 
 async def init(path=DB_PATH) -> None:
     global DB_PATH
@@ -11,14 +18,13 @@ async def init(path=DB_PATH) -> None:
             "CREATE TABLE IF NOT EXISTS users ("
             " user_id INTEGER PRIMARY KEY,"
             " campus TEXT,"
-            " lang TEXT NOT NULL DEFAULT 'en',"
-            " subscribed INTEGER NOT NULL DEFAULT 0)"
+            " lang TEXT NOT NULL DEFAULT 'en')"
         )
-        # Databases created before /subscribe existed lack the column.
         async with db.execute("PRAGMA table_info(users)") as cursor:
-            columns = {row[1] for row in await cursor.fetchall()}
-        if "subscribed" not in columns:
-            await db.execute("ALTER TABLE users ADD COLUMN subscribed INTEGER NOT NULL DEFAULT 0")
+            existing = {row[1] for row in await cursor.fetchall()}
+        for column, definition in LATER_COLUMNS.items():
+            if column not in existing:
+                await db.execute(f"ALTER TABLE users ADD COLUMN {column} {definition}")
         await db.commit()
 
 
@@ -61,19 +67,33 @@ async def set_subscribed(user_id: int, subscribed: bool) -> None:
     await _set(user_id, "subscribed", int(subscribed))
 
 
-async def is_subscribed(user_id: int) -> bool:
+async def set_notify_time(user_id: int, hhmm: str) -> None:
+    await _set(user_id, "notify_time", hhmm)
+
+
+async def set_notify_days(user_id: int, days: str) -> None:
+    await _set(user_id, "notify_days", days)
+
+
+async def get_notify(user_id: int) -> tuple[bool, str, str]:
+    """(subscribed, "HH:MM", weekday digits like "01234")."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT subscribed FROM users WHERE user_id = ?", (user_id,)
+            "SELECT subscribed, notify_time, notify_days FROM users WHERE user_id = ?", (user_id,)
         ) as cursor:
             row = await cursor.fetchone()
-    return bool(row and row[0])
+    if not row:
+        return False, "11:00", "01234"
+    return bool(row[0]), row[1], row[2]
 
 
-async def subscribers() -> list[tuple[int, str, str]]:
-    """(user_id, campus, lang) for every subscriber who has picked a campus."""
+async def subscribers_due(weekday: int, hhmm: str) -> list[tuple[int, str, str]]:
+    """(user_id, campus, lang) for subscribers due at this weekday and minute."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT user_id, campus, lang FROM users WHERE subscribed = 1 AND campus IS NOT NULL"
+            "SELECT user_id, campus, lang FROM users"
+            " WHERE subscribed = 1 AND campus IS NOT NULL"
+            " AND notify_time = ? AND instr(notify_days, ?) > 0",
+            (hhmm, str(weekday)),
         ) as cursor:
             return await cursor.fetchall()

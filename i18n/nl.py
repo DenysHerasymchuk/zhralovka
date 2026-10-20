@@ -13,6 +13,9 @@ TEXTS = {
     "btn_change_lang": "🌐 Language: English",
     "btn_daily_on": "🔔 Stuur me elke dag het menu",
     "btn_daily_off": "🔕 Stop het dagelijkse menu",
+    "btn_change_time": "⏰ Ander tijdstip",
+    "btn_change_days": "📅 Andere dagen",
+    "btn_done": "✅ Klaar",
     "placeholder": "Honger?",
 
     # Onboarding
@@ -39,8 +42,18 @@ TEXTS = {
     "daily_off": "uit",
     "campus_saved": "✅ <b>Campus ingesteld op {campus}</b>\nTik op 🍽 Vandaag om te zien wat er op het menu staat.",
     "lang_saved": "✅ <b>Overgeschakeld naar het Nederlands</b>",
-    "subscribed": "🔔 <b>Dagelijks menu aan</b>\nIk stuur je elke weekdag om {time} het menu. Stuur /subscribe opnieuw om te stoppen.",
+    "subscribed": (
+        "🔔 <b>Dagelijks menu aan</b>\n"
+        "Ik stuur je het menu om {time}. Tijdstip en dagen pas je aan via ⚙️ Instellingen, "
+        "of stuur /subscribe opnieuw om te stoppen."
+    ),
     "unsubscribed": "🔕 <b>Dagelijks menu uit</b>\nStuur /subscribe om het weer aan te zetten.",
+    "ask_time": "⏰ <b>Wanneer moet ik het sturen?</b>\nStuur me een tijdstip, bv. 10:45.",
+    "bad_time": "🤔 Dat is geen tijdstip. Probeer 10:45, of stuur /cancel.",
+    "time_saved": "✅ <b>Dagelijks menu om {time}</b>",
+    "time_cancelled": "Oké, het tijdstip blijft hetzelfde.",
+    "pick_days": "📅 <b>Welke dagen?</b>\nTik op een dag om hem aan of uit te zetten.",
+    "need_a_day": "Kies minstens één dag. Wil je het dagelijkse menu stoppen, gebruik dan 🔕 in Instellingen.",
 
     # Menu
     "weekend": (

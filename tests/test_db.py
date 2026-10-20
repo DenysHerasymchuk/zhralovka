@@ -34,20 +34,32 @@ class DbTest(unittest.IsolatedAsyncioTestCase):
         await db.set_campus(1, "Lier")
         self.assertEqual(await db.get_user(1), ("Lier", "en"))
 
-    async def test_subscribe_round_trip(self):
+    async def test_notify_defaults(self):
+        self.assertEqual(await db.get_notify(1), (False, "11:00", "01234"))
+        await db.add_user(1, "en")
+        self.assertEqual(await db.get_notify(1), (False, "11:00", "01234"))
+
+    async def test_notify_settings_round_trip(self):
+        await db.set_subscribed(1, True)
+        await db.set_notify_time(1, "09:30")
+        await db.set_notify_days(1, "024")
+        self.assertEqual(await db.get_notify(1), (True, "09:30", "024"))
+
+    async def test_subscribers_due_matches_time_and_day(self):
         await db.set_campus(1, "Geel")
-        self.assertFalse(await db.is_subscribed(1))
         await db.set_subscribed(1, True)
-        self.assertTrue(await db.is_subscribed(1))
-        self.assertEqual(await db.subscribers(), [(1, "Geel", "en")])
-        await db.set_subscribed(1, False)
-        self.assertEqual(await db.subscribers(), [])
+        await db.set_notify_time(1, "09:30")
+        await db.set_notify_days(1, "024")
+        self.assertEqual(await db.subscribers_due(2, "09:30"), [(1, "Geel", "en")])
+        self.assertEqual(await db.subscribers_due(1, "09:30"), [])  # Tuesday is off
+        self.assertEqual(await db.subscribers_due(2, "11:00"), [])
 
-    async def test_subscribers_need_a_campus(self):
-        await db.set_subscribed(1, True)
-        self.assertEqual(await db.subscribers(), [])
+    async def test_subscribers_due_skips_unsubscribed_and_campusless(self):
+        await db.set_campus(1, "Geel")
+        await db.set_subscribed(2, True)
+        self.assertEqual(await db.subscribers_due(0, "11:00"), [])
 
-    async def test_old_database_gets_subscribed_column(self):
+    async def test_old_database_gets_new_columns(self):
         path = Path(self.tmp.name) / "old.db"
         async with aiosqlite.connect(path) as conn:
             await conn.execute("CREATE TABLE users (user_id INTEGER PRIMARY KEY, campus TEXT, lang TEXT NOT NULL DEFAULT 'en')")
@@ -56,7 +68,7 @@ class DbTest(unittest.IsolatedAsyncioTestCase):
         await db.init(path)
         self.assertEqual(await db.get_user(7), ("Lier", "nl"))
         await db.set_subscribed(7, True)
-        self.assertEqual(await db.subscribers(), [(7, "Lier", "nl")])
+        self.assertEqual(await db.subscribers_due(0, "11:00"), [(7, "Lier", "nl")])
 
 
 if __name__ == "__main__":

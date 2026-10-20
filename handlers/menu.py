@@ -5,8 +5,9 @@ from datetime import datetime
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, LinkPreviewOptions, Message
+from aiogram.types import CallbackQuery, Message
 
+import screens
 from config import TIMEZONE
 from formatting import format_day, pick_day
 from handlers.common import profile
@@ -14,9 +15,6 @@ from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import Week
-
-# Dish names are links; without this Telegram previews the first one.
-NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 
 router = Router()
 
@@ -40,7 +38,7 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
 async def show_today(message: Message):
     campus, lang = await profile(message.from_user)
     if not campus:
-        await message.answer(t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
 
     now = today()
@@ -53,11 +51,7 @@ async def show_today(message: Message):
     if problem:
         await message.answer(problem)
         return
-    await message.answer(
-        format_day(week, day, lang, campus),
-        reply_markup=day_nav_keyboard(day, lang),
-        link_preview_options=NO_PREVIEW,
-    )
+    await screens.send(message, "today", format_day(week, day, lang, campus), reply_markup=day_nav_keyboard(day, lang))
 
 
 @router.message(Command("week", "menu"))
@@ -65,7 +59,7 @@ async def show_today(message: Message):
 async def show_week(message: Message):
     campus, lang = await profile(message.from_user)
     if not campus:
-        await message.answer(t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
 
     week, problem = await load_week(campus, lang)
@@ -74,11 +68,7 @@ async def show_week(message: Message):
         return
 
     day, _ = pick_day(today())
-    await message.answer(
-        format_day(week, day, lang, campus),
-        reply_markup=days_keyboard(week.start, day, lang),
-        link_preview_options=NO_PREVIEW,
-    )
+    await screens.send(message, "thisweek", format_day(week, day, lang, campus), reply_markup=days_keyboard(week.start, day, lang))
 
 
 @router.callback_query(F.data.startswith(("day:", "nav:")))
@@ -97,9 +87,9 @@ async def switch_day(callback: CallbackQuery):
 
     # Tapping the day that's already open raises "message is not modified".
     with suppress(TelegramBadRequest):
-        await callback.message.edit_text(
+        await screens.edit(
+            callback.message,
             format_day(week, day, lang, campus),
             reply_markup=days_keyboard(week.start, day, lang) if kind == "day" else day_nav_keyboard(day, lang),
-            link_preview_options=NO_PREVIEW,
         )
     await callback.answer()

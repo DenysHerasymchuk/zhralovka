@@ -7,9 +7,8 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 import db
-from config import DAILY_AT
 from handlers.common import profile
-from i18n import all_langs, t
+from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, main_keyboard, settings_keyboard
 from menu.models import CAMPUSES
 
@@ -17,15 +16,15 @@ log = logging.getLogger(__name__)
 router = Router()
 
 
+def days_label(days: str, lang: str) -> str:
+    return ", ".join(day_name(lang, int(d))[:2].capitalize() for d in sorted(days))
+
+
 async def settings_view(user_id: int, campus: str | None, lang: str) -> dict:
-    subscribed = await db.is_subscribed(user_id)
+    subscribed, hhmm, days = await db.get_notify(user_id)
+    daily = f"{t(lang, 'daily_on')} · {hhmm} · {days_label(days, lang)}" if subscribed else t(lang, "daily_off")
     return {
-        "text": t(
-            lang,
-            "settings",
-            campus=campus or t(lang, "no_campus"),
-            daily=t(lang, "daily_on" if subscribed else "daily_off"),
-        ),
+        "text": t(lang, "settings", campus=campus or t(lang, "no_campus"), daily=daily),
         "reply_markup": settings_keyboard(lang, subscribed),
     }
 
@@ -84,35 +83,4 @@ async def switch_lang_from_settings(callback: CallbackQuery):
     with suppress(TelegramBadRequest):
         await callback.message.delete()
     await toggle_lang(callback.message, callback.from_user)
-    await callback.answer()
-
-
-async def toggle_subscription(user_id: int) -> bool:
-    subscribed = not await db.is_subscribed(user_id)
-    await db.set_subscribed(user_id, subscribed)
-    log.info("User %s %s the daily menu", user_id, "subscribed to" if subscribed else "unsubscribed from")
-    return subscribed
-
-
-@router.message(Command("subscribe"))
-async def subscribe(message: Message):
-    campus, lang = await profile(message.from_user)
-    if not campus:
-        await message.answer(t(lang, "pick_campus"), reply_markup=campus_keyboard())
-        return
-    if await toggle_subscription(message.from_user.id):
-        await message.answer(t(lang, "subscribed", time=DAILY_AT.strftime("%H:%M")))
-    else:
-        await message.answer(t(lang, "unsubscribed"))
-
-
-@router.callback_query(F.data == "settings:subscribe")
-async def subscribe_from_settings(callback: CallbackQuery):
-    campus, lang = await profile(callback.from_user)
-    if not campus:
-        await callback.message.edit_text(t(lang, "pick_campus"), reply_markup=campus_keyboard())
-        await callback.answer()
-        return
-    await toggle_subscription(callback.from_user.id)
-    await callback.message.edit_text(**await settings_view(callback.from_user.id, campus, lang))
     await callback.answer()

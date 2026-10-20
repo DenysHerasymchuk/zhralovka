@@ -58,10 +58,26 @@ def day_nav_keyboard(day: int, lang: str) -> InlineKeyboardMarkup | None:
 
 def settings_keyboard(lang: str, subscribed: bool) -> InlineKeyboardMarkup:
     daily = t(lang, "btn_daily_off" if subscribed else "btn_daily_on")
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text=t(lang, "btn_change_campus"), callback_data="settings:campus")],
-            [InlineKeyboardButton(text=t(lang, "btn_change_lang"), callback_data="settings:lang")],
-            [InlineKeyboardButton(text=daily, callback_data="settings:subscribe")],
-        ]
-    )
+    rows = [
+        [InlineKeyboardButton(text=t(lang, "btn_change_campus"), callback_data="settings:campus")],
+        [InlineKeyboardButton(text=t(lang, "btn_change_lang"), callback_data="settings:lang")],
+        [InlineKeyboardButton(text=daily, callback_data="settings:subscribe")],
+    ]
+    if subscribed:
+        rows.append([
+            InlineKeyboardButton(text=t(lang, "btn_change_time"), callback_data="settings:time"),
+            InlineKeyboardButton(text=t(lang, "btn_change_days"), callback_data="settings:days"),
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def notify_days_keyboard(days: str, lang: str) -> InlineKeyboardMarkup:
+    buttons = [
+        InlineKeyboardButton(
+            text=f"✅ {day_name(lang, day)[:2].capitalize()}" if str(day) in days else day_name(lang, day)[:2].capitalize(),
+            callback_data=f"ndays:{day}",
+        )
+        for day in range(5)
+    ]
+    done = InlineKeyboardButton(text=t(lang, "btn_done"), callback_data="ndays:done")
+    return InlineKeyboardMarkup(inline_keyboard=[buttons, [done]])

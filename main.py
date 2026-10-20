@@ -10,6 +10,7 @@ from config import API_TOKEN, LOG_LEVEL
 from handlers.fallback import router as fallback_router
 from handlers.inline import router as inline_router
 from handlers.menu import router as menu_router
+from handlers.notify import router as notify_router
 from handlers.settings import router as settings_router
 from handlers.start import router as start_router
 import notifier
@@ -22,12 +23,13 @@ log = logging.getLogger("bot")
 
 dp = Dispatcher()
 dp.update.outer_middleware(log_updates)
-# fallback_router catches every message, so it goes last.
+# Order matters: notify after menu so menu buttons beat a pending time prompt; fallback last.
 dp.include_routers(
     start_router,
     settings_router,
     menu_router,
     inline_router,
+    notify_router,
     fallback_router,
 )
 
@@ -45,7 +47,6 @@ async def main():
         raise RuntimeError("API_TOKEN is missing. Copy .env.example to .env and add your bot token.")
 
     logging.basicConfig(level=LOG_LEVEL, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-    # log_updates replaces aiogram's own "Update id=... is handled" lines.
     logging.getLogger("aiogram.event").setLevel(logging.WARNING)
     await db.init()
     log.info("Database ready at %s", db.DB_PATH)

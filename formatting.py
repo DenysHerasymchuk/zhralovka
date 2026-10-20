@@ -46,7 +46,7 @@ def _dish_card(dish, lang: str) -> str:
 
 
 def _sorted_dishes(week: Week, day: int) -> list:
-    # Lunch first; sorted() is stable, so the rest keep the kitchen's order.
+    # Lunch first, the rest in the kitchen's order.
     return sorted(week.days[DAYS[day]], key=lambda d: not is_lunch(d))
 
 

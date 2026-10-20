@@ -32,7 +32,6 @@ async def log_updates(
     try:
         result = await handler(update, data)
     except Exception:
-        # aiogram logs the traceback; this line ties the failure to the user and action.
         log.error("%s %s failed after %.0fms", who, what, (time.perf_counter() - start) * 1000)
         raise
     log.info("%s %s %.0fms", who, what, (time.perf_counter() - start) * 1000)

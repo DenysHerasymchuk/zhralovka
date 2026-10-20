@@ -57,7 +57,14 @@ New users get Dutch if their Telegram app is set to Dutch. Everyone else starts 
 
 ### Daily menu
 
-`/subscribe` (or the 🔔 button in ⚙️ Settings) sends you that day's menu every weekday at 11:00 Brussels time, with the ⬅️/➡️ buttons. Send it again to stop. Nothing is sent when the kitchen lists no dishes for the day or the menu service is down. Users who block the bot are unsubscribed automatically. Set `DAILY_AT` (for example `10:30`) to change the time.
+`/subscribe` (or the 🔔 button in ⚙️ Settings) sends you that day's menu with the ⬅️/➡️ buttons. By default it comes at 11:00 Brussels time, Monday to Friday. Send `/subscribe` again to stop.
+
+While you're subscribed, ⚙️ Settings shows two more buttons:
+
+- **⏰ Change time:** type a time like `10:45` (`9.05` and `10h45` work too). Send `/cancel` to keep the current one. The menu buttons keep working while the bot waits for the time.
+- **📅 Change days:** tap weekdays on or off. At least one has to stay on.
+
+Nothing is sent when the kitchen lists no dishes for the day or the menu service is down. Users who block the bot are unsubscribed automatically. The bot checks for due subscribers once a minute. A send time that falls while the bot is restarting is skipped for that day.
 
 Each dish name is a link. Tapping it opens a Google Images search for that exact name in the browser.
 
