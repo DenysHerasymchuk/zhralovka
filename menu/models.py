@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, timedelta
 from typing import NamedTuple
 
 CAMPUSES = ("Antwerpen", "De Nayer", "Geel", "Lier", "Mechelen", "Turnhout", "Vorselaar")
@@ -21,6 +21,11 @@ class Week(NamedTuple):
 
 def is_lunch(dish: Dish) -> bool:
     return "lunch" in dish.category_en.lower()
+
+
+def covers(week: Week, when: date) -> bool:
+    """Whether `when` is one of the week's weekdays; the API can lag a week behind."""
+    return week.start <= when < week.start + timedelta(days=len(DAYS))
 
 
 def _clean(value) -> str:

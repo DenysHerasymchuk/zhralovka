@@ -48,6 +48,10 @@ class InlineTest(HandlerTestCase):
         self.assertEqual(answer.args[0], [])
         self.assertEqual(answer.kwargs["button"].start_parameter, "campus")
 
+    async def test_stranger_is_not_registered(self):
+        await self.answer("geel")
+        self.assertIsNone(await db.get_user(42))
+
     async def test_service_down_returns_nothing(self):
         await db.set_campus(42, "Geel")
         self.assertEqual((await self.answer(week=MenuUnavailable)).args[0], [])

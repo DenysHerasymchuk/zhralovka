@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import time
-from datetime import datetime
+from datetime import date, datetime
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
@@ -12,7 +12,7 @@ from config import TIMEZONE
 from formatting import format_day
 from keyboards.menu import day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
-from menu.models import DAYS
+from menu.models import DAYS, covers
 
 # Telegram limit: ~30 messages per second.
 SEND_INTERVAL = 0.05
@@ -20,7 +20,8 @@ SEND_INTERVAL = 0.05
 log = logging.getLogger(__name__)
 
 
-async def send_due(bot: Bot, day: int, hhmm: str) -> int:
+async def send_due(bot: Bot, today: date, hhmm: str) -> int:
+    day = today.weekday()
     by_campus: dict[str, list[tuple[int, str]]] = {}
     for user_id, campus, lang in await db.subscribers_due(day, hhmm):
         by_campus.setdefault(campus, []).append((user_id, lang))
@@ -34,7 +35,7 @@ async def send_due(bot: Bot, day: int, hhmm: str) -> int:
         except MenuUnavailable:
             log.warning("Daily menu skipped for %s: menu service unavailable", campus)
             continue
-        if not week or not week.days[DAYS[day]]:
+        if not week or not covers(week, today) or not week.days[DAYS[day]]:
             continue
 
         for user_id, lang in users:
@@ -62,6 +63,6 @@ async def run(bot: Bot) -> None:
         if now.weekday() >= 5:
             continue
         try:
-            await send_due(bot, now.weekday(), now.strftime("%H:%M"))
+            await send_due(bot, now.date(), now.strftime("%H:%M"))
         except Exception:
             log.exception("Daily menu run failed")

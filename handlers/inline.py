@@ -6,12 +6,12 @@ from aiogram.types import (
     InputTextMessageContent,
 )
 
+import db
 from formatting import day_summary, day_title, format_day, pick_day
-from handlers.common import profile
 from handlers.menu import load_week, today
-from screens import NO_PREVIEW
-from i18n import t
+from i18n import detect_lang, t
 from menu.models import CAMPUSES
+from screens import NO_PREVIEW
 
 CACHE_SECONDS = 300
 
@@ -27,7 +27,9 @@ def _campus_from_query(query: str) -> str | None:
 
 @router.inline_query()
 async def inline_menu(inline_query: InlineQuery):
-    saved_campus, lang = await profile(inline_query.from_user)
+    # Read-only: typing @bot in some chat shouldn't register the user.
+    user = inline_query.from_user
+    saved_campus, lang = await db.get_user(user.id) or (None, detect_lang(user.language_code))
     campus = _campus_from_query(inline_query.query) or saved_campus
     if not campus:
         await inline_query.answer(

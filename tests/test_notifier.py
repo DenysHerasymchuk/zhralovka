@@ -1,4 +1,5 @@
 import unittest
+from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from aiogram.exceptions import TelegramForbiddenError
@@ -6,7 +7,7 @@ from aiogram.exceptions import TelegramForbiddenError
 import db
 import notifier
 from menu.models import DAYS, Week
-from tests.helpers import WEEK, HandlerTestCase
+from tests.helpers import TUESDAY, WEEK, HandlerTestCase
 
 
 class SendDueTest(HandlerTestCase):
@@ -31,7 +32,7 @@ class SendDueTest(HandlerTestCase):
         await self.subscribe(3, "Lier")
         fetch = AsyncMock(return_value=WEEK)
         with patch("notifier.fetch_week", fetch):
-            sent = await notifier.send_due(self.bot, 1, "11:00")
+            sent = await notifier.send_due(self.bot, TUESDAY,"11:00")
         self.assertEqual(sent, 3)
         self.assertEqual(sorted(c.args[0] for c in fetch.await_args_list), ["Geel", "Lier"])
         dutch = next(c for c in self.bot.send_photo.await_args_list if c.args[0] == 2)
@@ -45,28 +46,34 @@ class SendDueTest(HandlerTestCase):
         await self.subscribe(3, "Geel", hhmm="09:30", days="024")
         fetch = AsyncMock(return_value=WEEK)
         with patch("notifier.fetch_week", fetch):
-            self.assertEqual(await notifier.send_due(self.bot, 1, "09:30"), 1)
+            self.assertEqual(await notifier.send_due(self.bot, TUESDAY,"09:30"), 1)
         self.assertEqual(self.bot.send_photo.await_args.args[0], 1)
 
     async def test_nobody_due_skips_fetching(self):
         await self.subscribe(1, "Geel")
         fetch = AsyncMock(return_value=WEEK)
         with patch("notifier.fetch_week", fetch):
-            self.assertEqual(await notifier.send_due(self.bot, 1, "08:00"), 0)
+            self.assertEqual(await notifier.send_due(self.bot, TUESDAY,"08:00"), 0)
         fetch.assert_not_awaited()
 
     async def test_empty_day_sends_nothing(self):
         await self.subscribe(1, "Geel")
         empty = Week("Geel", WEEK.start, {day: [] for day in DAYS})
         with patch("notifier.fetch_week", AsyncMock(return_value=empty)):
-            self.assertEqual(await notifier.send_due(self.bot, 1, "11:00"), 0)
+            self.assertEqual(await notifier.send_due(self.bot, TUESDAY,"11:00"), 0)
+        self.bot.send_photo.assert_not_awaited()
+
+    async def test_last_weeks_menu_is_not_sent(self):
+        await self.subscribe(1, "Geel")
+        with patch("notifier.fetch_week", AsyncMock(return_value=WEEK)):
+            self.assertEqual(await notifier.send_due(self.bot, TUESDAY + timedelta(days=7), "11:00"), 0)
         self.bot.send_photo.assert_not_awaited()
 
     async def test_blocked_user_is_unsubscribed(self):
         await self.subscribe(1, "Geel")
         self.bot.send_photo.side_effect = TelegramForbiddenError(MagicMock(), "bot was blocked by the user")
         with patch("notifier.fetch_week", AsyncMock(return_value=WEEK)):
-            self.assertEqual(await notifier.send_due(self.bot, 1, "11:00"), 0)
+            self.assertEqual(await notifier.send_due(self.bot, TUESDAY,"11:00"), 0)
         self.assertFalse((await db.get_notify(1))[0])
 
 

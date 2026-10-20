@@ -1,4 +1,5 @@
 import unittest
+from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
 import db
@@ -38,6 +39,14 @@ class MenuHandlersTest(HandlerTestCase):
             await menu.show_today(msg)
         self.assertIn("<b>Tuesday</b>, 13 October", sent_text(msg))
         self.assertEqual(sent_picture(msg), "today")
+
+    async def test_today_with_last_weeks_menu_says_no_menu(self):
+        await db.set_campus(42, "Geel")
+        msg = message()
+        with patch("handlers.menu.today", return_value=TUESDAY + timedelta(days=7)), \
+             patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+            await menu.show_today(msg)
+        self.assertIn("Geel hasn't published", sent_text(msg))
 
     async def test_today_on_weekend(self):
         await db.set_campus(42, "Geel")

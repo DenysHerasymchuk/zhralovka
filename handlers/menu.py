@@ -14,7 +14,7 @@ from handlers.common import profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
-from menu.models import Week
+from menu.models import Week, covers
 
 router = Router()
 
@@ -48,6 +48,8 @@ async def show_today(message: Message):
         return
 
     week, problem = await load_week(campus, lang)
+    if not problem and not covers(week, now):
+        problem = t(lang, "no_menu", campus=campus)
     if problem:
         await message.answer(problem)
         return

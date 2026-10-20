@@ -4,10 +4,9 @@ from aiogram import Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
-import db
 import screens
-from i18n import detect_lang, t
 from handlers.common import profile
+from i18n import t
 from keyboards.menu import campus_keyboard, main_keyboard
 
 router = Router()
@@ -32,6 +31,5 @@ async def start(message: Message):
 
 @router.message(Command("help"))
 async def help_(message: Message):
-    user = await db.get_user(message.from_user.id)
-    lang = user[1] if user else detect_lang(message.from_user.language_code)
+    _, lang = await profile(message.from_user)
     await screens.send(message, "share", t(lang, "help"))

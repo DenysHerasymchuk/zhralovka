@@ -2,11 +2,13 @@ import aiosqlite
 
 from config import DB_PATH
 
+DEFAULT_TIME, DEFAULT_DAYS = "11:00", "01234"
+
 # Added after the first release; init() adds any that an older database lacks.
 LATER_COLUMNS = {
     "subscribed": "INTEGER NOT NULL DEFAULT 0",
-    "notify_time": "TEXT NOT NULL DEFAULT '11:00'",
-    "notify_days": "TEXT NOT NULL DEFAULT '01234'",
+    "notify_time": f"TEXT NOT NULL DEFAULT '{DEFAULT_TIME}'",
+    "notify_days": f"TEXT NOT NULL DEFAULT '{DEFAULT_DAYS}'",
 }
 
 
@@ -83,7 +85,7 @@ async def get_notify(user_id: int) -> tuple[bool, str, str]:
         ) as cursor:
             row = await cursor.fetchone()
     if not row:
-        return False, "11:00", "01234"
+        return False, DEFAULT_TIME, DEFAULT_DAYS
     return bool(row[0]), row[1], row[2]
 
 

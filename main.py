@@ -6,6 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.types import BotCommand
 
 import db
+import notifier
 from config import API_TOKEN, LOG_LEVEL
 from handlers.fallback import router as fallback_router
 from handlers.inline import router as inline_router
@@ -13,7 +14,6 @@ from handlers.menu import router as menu_router
 from handlers.notify import router as notify_router
 from handlers.settings import router as settings_router
 from handlers.start import router as start_router
-import notifier
 from i18n import LANGS, t
 from middleware import log_updates
 
