@@ -66,28 +66,30 @@ class MenuHandlersTest(HandlerTestCase):
             await menu.switch_day(cb)
         self.assertIn("<b>Friday</b>, 16 October", cb.message.edit_text.await_args.args[0])
 
-    async def test_today_next_day_button(self):
+    async def test_today_day_nav_buttons(self):
         await db.set_campus(42, "Geel")
         msg = message()
         with patch("handlers.menu.today", return_value=TUESDAY), \
              patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
             await menu.show_today(msg)
-        button = msg.answer.await_args.kwargs["reply_markup"].inline_keyboard[0][0]
-        self.assertEqual(button.callback_data, "next:2")
+        row = msg.answer.await_args.kwargs["reply_markup"].inline_keyboard[0]
+        self.assertEqual([b.callback_data for b in row], ["nav:0", "nav:2"])
 
-        cb = callback(button.callback_data)
+        cb = callback("nav:2")
         with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
             await menu.switch_day(cb)
         edit = cb.message.edit_text.await_args
         self.assertIn("<b>Wednesday</b>", edit.args[0])
-        self.assertEqual(edit.kwargs["reply_markup"].inline_keyboard[0][0].callback_data, "next:3")
+        self.assertEqual([b.callback_data for b in edit.kwargs["reply_markup"].inline_keyboard[0]], ["nav:1", "nav:3"])
 
-    async def test_no_next_day_after_friday(self):
+    async def test_monday_has_only_next_and_friday_only_previous(self):
         await db.set_campus(42, "Geel")
-        cb = callback("next:4")
-        with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
-            await menu.switch_day(cb)
-        self.assertIsNone(cb.message.edit_text.await_args.kwargs["reply_markup"])
+        for day, expected in (("0", ["nav:1"]), ("4", ["nav:3"])):
+            cb = callback(f"nav:{day}")
+            with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+                await menu.switch_day(cb)
+            row = cb.message.edit_text.await_args.kwargs["reply_markup"].inline_keyboard[0]
+            self.assertEqual([b.callback_data for b in row], expected)
 
     async def test_switch_day_alert_is_plain_text(self):
         await db.set_campus(42, "Geel")

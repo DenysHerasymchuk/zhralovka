@@ -6,6 +6,7 @@ TEXTS = {
     # Keyboards
     "btn_today": "🍽 Today",
     "btn_week": "📅 This week",
+    "btn_prev_day": "⬅️ Previous day",
     "btn_next_day": "Next day ➡️",
     "btn_settings": "⚙️ Settings",
     "btn_change_campus": "📍 Change campus",

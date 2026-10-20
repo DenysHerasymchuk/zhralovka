@@ -11,7 +11,7 @@ from aiogram.types import CallbackQuery, LinkPreviewOptions, Message
 from formatting import format_day, pick_day
 from handlers.common import profile
 from i18n import all_langs, day_name, t
-from keyboards.menu import campus_keyboard, days_keyboard, next_day_keyboard
+from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import Week
 
@@ -56,7 +56,7 @@ async def show_today(message: Message):
         return
     await message.answer(
         format_day(week, day, lang, campus),
-        reply_markup=next_day_keyboard(day, lang),
+        reply_markup=day_nav_keyboard(day, lang),
         link_preview_options=NO_PREVIEW,
     )
 
@@ -82,7 +82,7 @@ async def show_week(message: Message):
     )
 
 
-@router.callback_query(F.data.startswith(("day:", "next:")))
+@router.callback_query(F.data.startswith(("day:", "nav:")))
 async def switch_day(callback: CallbackQuery):
     campus, lang = await profile(callback.from_user)
     kind, _, day = callback.data.partition(":")
@@ -100,7 +100,7 @@ async def switch_day(callback: CallbackQuery):
     with suppress(TelegramBadRequest):
         await callback.message.edit_text(
             format_day(week, day, lang, campus),
-            reply_markup=days_keyboard(week.start, day, lang) if kind == "day" else next_day_keyboard(day, lang),
+            reply_markup=days_keyboard(week.start, day, lang) if kind == "day" else day_nav_keyboard(day, lang),
             link_preview_options=NO_PREVIEW,
         )
     await callback.answer()

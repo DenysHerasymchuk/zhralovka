@@ -47,11 +47,13 @@ def days_keyboard(start: date, selected: int, lang: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
-def next_day_keyboard(day: int, lang: str) -> InlineKeyboardMarkup | None:
-    if day >= 4:
-        return None
-    button = InlineKeyboardButton(text=t(lang, "btn_next_day"), callback_data=f"next:{day + 1}")
-    return InlineKeyboardMarkup(inline_keyboard=[[button]])
+def day_nav_keyboard(day: int, lang: str) -> InlineKeyboardMarkup | None:
+    buttons = []
+    if day > 0:
+        buttons.append(InlineKeyboardButton(text=t(lang, "btn_prev_day"), callback_data=f"nav:{day - 1}"))
+    if day < 4:
+        buttons.append(InlineKeyboardButton(text=t(lang, "btn_next_day"), callback_data=f"nav:{day + 1}"))
+    return InlineKeyboardMarkup(inline_keyboard=[buttons]) if buttons else None
 
 
 def settings_keyboard(lang: str) -> InlineKeyboardMarkup:

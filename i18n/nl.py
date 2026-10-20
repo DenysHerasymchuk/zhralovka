@@ -6,6 +6,7 @@ TEXTS = {
     # Keyboards
     "btn_today": "🍽 Vandaag",
     "btn_week": "📅 Deze week",
+    "btn_prev_day": "⬅️ Vorige dag",
     "btn_next_day": "Volgende dag ➡️",
     "btn_settings": "⚙️ Instellingen",
     "btn_change_campus": "📍 Andere campus",
