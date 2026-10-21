@@ -5,6 +5,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from aiogram.types import CallbackQuery, Message
+
 import db
 from menu.models import DAYS, Dish, Week
 
@@ -16,21 +18,24 @@ TUESDAY = date(2026, 10, 13)
 SATURDAY = date(2026, 10, 17)
 
 
-def message(text="", language_code="en"):
-    msg = MagicMock()
+def message(text="", language_code="en", user_id=42, chat_id=None, chat_type="private"):
+    """A message from user_id; in a private chat (the default) the chat id is the user id."""
+    msg = MagicMock(spec=Message)  # spec, so isinstance(msg, Message) holds
     msg.text = text
     msg.photo = None
-    msg.from_user = SimpleNamespace(id=42, language_code=language_code, first_name="Sam")
+    msg.from_user = SimpleNamespace(id=user_id, language_code=language_code, first_name="Sam")
+    msg.chat = SimpleNamespace(id=user_id if chat_id is None else chat_id, type=chat_type)
     msg.answer = AsyncMock()
     msg.answer_photo = AsyncMock()
     return msg
 
 
-def callback(data):
-    cb = MagicMock()
+def callback(data, user_id=42, chat_id=None, chat_type="private"):
+    """A button tap by user_id on a message in chat_id (the user's own DM by default)."""
+    cb = MagicMock(spec=CallbackQuery)
     cb.data = data
-    cb.from_user = SimpleNamespace(id=42, language_code="en")
-    cb.message = message()
+    cb.from_user = SimpleNamespace(id=user_id, language_code="en")
+    cb.message = message(user_id=user_id, chat_id=chat_id, chat_type=chat_type)
     cb.message.edit_text = AsyncMock()
     cb.message.delete = AsyncMock()
     cb.answer = AsyncMock()

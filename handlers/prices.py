@@ -16,7 +16,7 @@ router = Router()
 
 @router.message(Command("prices", "price"))
 async def show_prices(message: Message):
-    _, lang = await profile(message.from_user)
+    _, lang = await profile(message)
     await screens.send(message, "menu", format_prices(0, lang), reply_markup=prices_keyboard(0))
 
 
@@ -27,7 +27,7 @@ async def switch_section(callback: CallbackQuery):
         await callback.answer()
         return
     section = int(choice)
-    _, lang = await profile(callback.from_user)
+    _, lang = await profile(callback)
     # Tapping the open section raises "message is not modified".
     with suppress(TelegramBadRequest):
         await screens.edit(callback.message, format_prices(section, lang), reply_markup=prices_keyboard(section))

@@ -10,5 +10,5 @@ router = Router()
 
 @router.message()
 async def fallback(message: Message):
-    campus, lang = await profile(message.from_user)
+    campus, lang = await profile(message)
     await message.answer(t(lang, "unknown"), reply_markup=main_keyboard(lang) if campus else None)

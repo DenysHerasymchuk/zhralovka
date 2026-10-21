@@ -184,3 +184,33 @@ class MenuHandlersTest(HandlerTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SharedChatTest(HandlerTestCase):
+    """A menu posted in a group belongs to the group, whoever taps its buttons."""
+
+    GROUP = -100123
+
+    async def test_tap_by_another_member_keeps_the_groups_campus(self):
+        await db.set_campus(self.GROUP, "Geel")
+        await db.set_campus(7, "Lier")  # the tapper's own DM campus
+        cb = callback("day:2", user_id=7, chat_id=self.GROUP, chat_type="supergroup")
+        fetch = AsyncMock(return_value=WEEK)
+        with patch("handlers.menu.fetch_week", fetch):
+            await menu.switch_day(cb)
+        self.assertEqual(fetch.await_args.args[0], "Geel")
+
+    async def test_tap_does_not_register_the_tapper(self):
+        await db.set_campus(self.GROUP, "Geel")
+        cb = callback("day:2", user_id=7, chat_id=self.GROUP, chat_type="supergroup")
+        with patch("handlers.menu.fetch_week", AsyncMock(return_value=WEEK)):
+            await menu.switch_day(cb)
+        self.assertIsNone(await db.get_user(7))
+
+    async def test_dm_still_uses_the_users_own_campus(self):
+        await db.set_campus(42, "Lier")
+        msg = message()
+        fetch = AsyncMock(return_value=WEEK)
+        with patch("handlers.menu.today", return_value=TUESDAY), patch("handlers.menu.fetch_week", fetch):
+            await menu.show_today(msg)
+        self.assertEqual(fetch.await_args.args[0], "Lier")
