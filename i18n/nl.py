@@ -108,4 +108,5 @@ TEXTS = {
     "cmd_start": "Opnieuw beginnen",
     "campus_saved_group": "✅ <b>Campus ingesteld op {campus}</b>\nStuur /today om te zien wat er op het menu staat.",
     "cmd_settings": "Campus, taal, dagelijks menu",
+    "admins_only": "🔒 Alleen groepsbeheerders kunnen dit aanpassen.",
 }

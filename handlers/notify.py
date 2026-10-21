@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import chat_id, profile
+from handlers.common import admin_only, chat_id, profile
 from handlers.settings import settings_view
 from i18n import t
 from keyboards.menu import campus_keyboard, notify_days_keyboard
@@ -46,6 +46,8 @@ async def toggle_subscription(cid: int) -> tuple[bool, str]:
 @router.message(Command("subscribe"))
 async def subscribe(message: Message):
     campus, lang = await profile(message)
+    if not await admin_only(message, lang):
+        return
     if not campus:
         await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
@@ -56,6 +58,8 @@ async def subscribe(message: Message):
 @router.callback_query(F.data == "settings:subscribe")
 async def subscribe_from_settings(callback: CallbackQuery):
     campus, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     if not campus:
         await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(), picture="location")
         await callback.answer()
@@ -68,6 +72,8 @@ async def subscribe_from_settings(callback: CallbackQuery):
 @router.callback_query(F.data == "settings:time")
 async def ask_time(callback: CallbackQuery, state: FSMContext):
     _, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     await state.set_state(NotifyForm.time)
     await callback.message.answer(t(lang, "ask_time"))
     await callback.answer()
@@ -97,6 +103,8 @@ async def save_time(message: Message, state: FSMContext):
 @router.callback_query(F.data == "settings:days")
 async def ask_days(callback: CallbackQuery):
     _, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     _, _, days = await db.get_notify(chat_id(callback))
     await screens.edit(callback.message, t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
     await callback.answer()
@@ -105,6 +113,8 @@ async def ask_days(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("ndays:"))
 async def toggle_day(callback: CallbackQuery):
     campus, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     choice = callback.data.removeprefix("ndays:")
     if choice == "done":
         await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))

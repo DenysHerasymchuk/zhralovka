@@ -107,4 +107,5 @@ TEXTS = {
     "cmd_start": "Start over",
     "campus_saved_group": "✅ <b>Campus set to {campus}</b>\nSend /today to see what's for lunch.",
     "cmd_settings": "Campus, language, daily menu",
+    "admins_only": "🔒 Only group admins can change this.",
 }

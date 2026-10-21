@@ -1,12 +1,16 @@
 import logging
 
+from aiogram.exceptions import TelegramAPIError
+
 from aiogram.types import CallbackQuery, Chat, Message, ReplyKeyboardMarkup
 
 import db
-from i18n import detect_lang
+from i18n import detect_lang, t
 from keyboards.menu import main_keyboard
 
 log = logging.getLogger(__name__)
+
+ADMIN_STATUSES = {"creator", "administrator"}
 
 
 def _chat(event: Message | CallbackQuery) -> Chat | None:
@@ -41,3 +45,30 @@ async def profile(event: Message | CallbackQuery) -> tuple[str | None, str]:
     await db.add_user(cid, lang)
     log.info("New chat %s, lang=%s", cid, lang)
     return None, lang
+
+
+async def is_admin(event: Message | CallbackQuery) -> bool:
+    """Anyone may change a DM's settings; in a group only its admins may."""
+    if not in_group(event):
+        return True
+    chat = _chat(event)
+    sender_chat = getattr(event, "sender_chat", None)
+    if sender_chat is not None and sender_chat.id == chat.id:
+        return True  # an anonymous admin, posting as the group
+    try:
+        member = await event.bot.get_chat_member(chat.id, event.from_user.id)
+    except TelegramAPIError as exc:
+        log.warning("Admin check in chat %s failed: %r", chat.id, exc)
+        return False
+    return member.status in ADMIN_STATUSES
+
+
+async def admin_only(event: Message | CallbackQuery, lang: str) -> bool:
+    """True if the sender may change this chat's settings; otherwise tells them why not."""
+    if await is_admin(event):
+        return True
+    if isinstance(event, CallbackQuery):
+        await event.answer(t(lang, "admins_only"), show_alert=True)
+    else:
+        await event.answer(t(lang, "admins_only"))
+    return False

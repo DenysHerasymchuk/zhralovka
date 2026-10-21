@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import chat_id, in_group, profile, reply_keyboard
+from handlers.common import admin_only, chat_id, in_group, profile, reply_keyboard
 from i18n import LANGS, all_langs, day_short, t
 from keyboards.menu import campus_keyboard, language_keyboard, settings_keyboard
 from menu.models import CAMPUSES
@@ -36,18 +36,24 @@ async def settings_view(cid: int, campus: str | None, lang: str) -> dict:
 @router.message(F.text.in_(all_langs("btn_settings")))
 async def show_settings(message: Message):
     campus, lang = await profile(message)
+    if not await admin_only(message, lang):
+        return
     await screens.send(message, "settings", **await settings_view(chat_id(message), campus, lang))
 
 
 @router.message(Command("campus"))
 async def ask_campus(message: Message):
     campus, lang = await profile(message)
+    if not await admin_only(message, lang):
+        return
     await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard(campus))
 
 
 @router.callback_query(F.data == "settings:campus")
 async def ask_campus_from_settings(callback: CallbackQuery):
     campus, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(campus), picture="location")
     await callback.answer()
 
@@ -60,6 +66,8 @@ async def save_campus(callback: CallbackQuery):
         return
 
     previous, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     await db.set_campus(chat_id(callback), campus)
     log.info("Chat %s picked campus %s", chat_id(callback), campus)
     if previous:
@@ -78,12 +86,16 @@ async def save_campus(callback: CallbackQuery):
 @router.message(Command("language"))
 async def ask_lang(message: Message):
     _, lang = await profile(message)
+    if not await admin_only(message, lang):
+        return
     await message.answer(t(lang, "pick_lang"), reply_markup=language_keyboard(lang))
 
 
 @router.callback_query(F.data == "settings:lang")
 async def ask_lang_from_settings(callback: CallbackQuery):
     _, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     await screens.edit(callback.message, t(lang, "pick_lang"), reply_markup=language_keyboard(lang))
     await callback.answer()
 
@@ -94,7 +106,9 @@ async def save_lang(callback: CallbackQuery):
     if lang not in LANGS:
         await callback.answer()
         return
-    campus, _ = await profile(callback)
+    campus, current = await profile(callback)
+    if not await admin_only(callback, current):
+        return
     await db.set_lang(chat_id(callback), lang)
     log.info("Chat %s switched to %s", chat_id(callback), lang)
     await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))
@@ -107,6 +121,8 @@ async def save_lang(callback: CallbackQuery):
 @router.callback_query(F.data == "settings:prices")
 async def toggle_prices(callback: CallbackQuery):
     campus, lang = await profile(callback)
+    if not await admin_only(callback, lang):
+        return
     show = not await db.get_show_prices(chat_id(callback))
     await db.set_show_prices(chat_id(callback), show)
     log.info("Chat %s turned menu prices %s", chat_id(callback), "on" if show else "off")
