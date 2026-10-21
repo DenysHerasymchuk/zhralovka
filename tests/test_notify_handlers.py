@@ -39,8 +39,7 @@ class NotifyHandlersTest(HandlerTestCase):
         self.assertIn("at 09:15", sent_text(msg))
 
     async def test_subscribe_without_campus_asks_for_one(self):
-        msg = message()
-        msg.from_user.id = 7
+        msg = message(user_id=7)
         await notify.subscribe(msg)
         self.assertFalse((await db.get_notify(7))[0])
         self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])

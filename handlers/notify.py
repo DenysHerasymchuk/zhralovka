@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import profile
+from handlers.common import chat_id, profile
 from handlers.settings import settings_view
 from i18n import t
 from keyboards.menu import campus_keyboard, notify_days_keyboard
@@ -35,39 +35,39 @@ def parse_time(text: str) -> str | None:
     return f"{hour:02}:{minute:02}"
 
 
-async def toggle_subscription(user_id: int) -> tuple[bool, str]:
-    subscribed, hhmm, _ = await db.get_notify(user_id)
+async def toggle_subscription(cid: int) -> tuple[bool, str]:
+    subscribed, hhmm, _ = await db.get_notify(cid)
     subscribed = not subscribed
-    await db.set_subscribed(user_id, subscribed)
-    log.info("User %s %s the daily menu", user_id, "subscribed to" if subscribed else "unsubscribed from")
+    await db.set_subscribed(cid, subscribed)
+    log.info("Chat %s %s the daily menu", cid, "subscribed to" if subscribed else "unsubscribed from")
     return subscribed, hhmm
 
 
 @router.message(Command("subscribe"))
 async def subscribe(message: Message):
-    campus, lang = await profile(message.from_user)
+    campus, lang = await profile(message)
     if not campus:
         await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
-    subscribed, hhmm = await toggle_subscription(message.from_user.id)
+    subscribed, hhmm = await toggle_subscription(chat_id(message))
     await message.answer(t(lang, "subscribed", time=hhmm) if subscribed else t(lang, "unsubscribed"))
 
 
 @router.callback_query(F.data == "settings:subscribe")
 async def subscribe_from_settings(callback: CallbackQuery):
-    campus, lang = await profile(callback.from_user)
+    campus, lang = await profile(callback)
     if not campus:
         await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(), picture="location")
         await callback.answer()
         return
-    await toggle_subscription(callback.from_user.id)
-    await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
+    await toggle_subscription(chat_id(callback))
+    await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))
     await callback.answer()
 
 
 @router.callback_query(F.data == "settings:time")
 async def ask_time(callback: CallbackQuery, state: FSMContext):
-    _, lang = await profile(callback.from_user)
+    _, lang = await profile(callback)
     await state.set_state(NotifyForm.time)
     await callback.message.answer(t(lang, "ask_time"))
     await callback.answer()
@@ -75,50 +75,50 @@ async def ask_time(callback: CallbackQuery, state: FSMContext):
 
 @router.message(NotifyForm.time, Command("cancel"))
 async def cancel_time(message: Message, state: FSMContext):
-    _, lang = await profile(message.from_user)
+    _, lang = await profile(message)
     await state.clear()
     await message.answer(t(lang, "time_cancelled"))
 
 
 @router.message(NotifyForm.time, F.text)
 async def save_time(message: Message, state: FSMContext):
-    _, lang = await profile(message.from_user)
+    _, lang = await profile(message)
     hhmm = parse_time(message.text)
     # One try only, so a forgotten prompt doesn't swallow the user's messages later on.
     await state.clear()
     if not hhmm:
         await message.answer(t(lang, "bad_time"))
         return
-    await db.set_notify_time(message.from_user.id, hhmm)
-    log.info("User %s set the daily menu to %s", message.from_user.id, hhmm)
+    await db.set_notify_time(chat_id(message), hhmm)
+    log.info("Chat %s set the daily menu to %s", chat_id(message), hhmm)
     await message.answer(t(lang, "time_saved", time=hhmm))
 
 
 @router.callback_query(F.data == "settings:days")
 async def ask_days(callback: CallbackQuery):
-    _, lang = await profile(callback.from_user)
-    _, _, days = await db.get_notify(callback.from_user.id)
+    _, lang = await profile(callback)
+    _, _, days = await db.get_notify(chat_id(callback))
     await screens.edit(callback.message, t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("ndays:"))
 async def toggle_day(callback: CallbackQuery):
-    campus, lang = await profile(callback.from_user)
+    campus, lang = await profile(callback)
     choice = callback.data.removeprefix("ndays:")
     if choice == "done":
-        await screens.edit(callback.message, **await settings_view(callback.from_user.id, campus, lang))
+        await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))
         await callback.answer()
         return
     if choice not in WEEKDAYS:
         await callback.answer()
         return
 
-    _, _, days = await db.get_notify(callback.from_user.id)
+    _, _, days = await db.get_notify(chat_id(callback))
     days = days.replace(choice, "") if choice in days else "".join(sorted(days + choice))
     if not days:
         await callback.answer(t(lang, "need_a_day"), show_alert=True)
         return
-    await db.set_notify_days(callback.from_user.id, days)
+    await db.set_notify_days(chat_id(callback), days)
     await screens.edit(callback.message, t(lang, "pick_days"), reply_markup=notify_days_keyboard(days, lang))
     await callback.answer()

@@ -14,7 +14,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def start(message: Message):
-    campus, lang = await profile(message.from_user)
+    campus, lang = await profile(message)
 
     await screens.send(
         message,
@@ -31,5 +31,5 @@ async def start(message: Message):
 
 @router.message(Command("help"))
 async def help_(message: Message):
-    _, lang = await profile(message.from_user)
+    _, lang = await profile(message)
     await screens.send(message, "share", t(lang, "help"))

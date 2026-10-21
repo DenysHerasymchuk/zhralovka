@@ -11,7 +11,7 @@ import db
 import screens
 from config import TIMEZONE
 from formatting import format_day, pick_day
-from handlers.common import profile
+from handlers.common import chat_id, profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
@@ -38,7 +38,7 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
 @router.message(Command("today", "menu"))
 @router.message(F.text.in_(all_langs("btn_today")))
 async def show_today(message: Message):
-    campus, lang = await profile(message.from_user)
+    campus, lang = await profile(message)
     if not campus:
         await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
@@ -55,14 +55,14 @@ async def show_today(message: Message):
     if problem:
         await message.answer(problem)
         return
-    prices = await db.get_show_prices(message.from_user.id)
+    prices = await db.get_show_prices(chat_id(message))
     await screens.send(message, "today", format_day(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang))
 
 
 @router.message(Command("week"))
 @router.message(F.text.in_(all_langs("btn_week")))
 async def show_week(message: Message):
-    campus, lang = await profile(message.from_user)
+    campus, lang = await profile(message)
     if not campus:
         await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
         return
@@ -73,7 +73,7 @@ async def show_week(message: Message):
         return
 
     day, _ = pick_day(today())
-    prices = await db.get_show_prices(message.from_user.id)
+    prices = await db.get_show_prices(chat_id(message))
     await screens.send(
         message, "thisweek", format_day(week, day, lang, campus, prices), reply_markup=days_keyboard(week.start, day, lang)
     )
@@ -81,13 +81,13 @@ async def show_week(message: Message):
 
 @router.callback_query(F.data.startswith(("day:", "nav:")))
 async def switch_day(callback: CallbackQuery):
-    campus, lang = await profile(callback.from_user)
+    campus, lang = await profile(callback)
     kind, _, day = callback.data.partition(":")
     if not campus or day not in {"0", "1", "2", "3", "4"}:
         await callback.answer()
         return
     day = int(day)
-    prices = await db.get_show_prices(callback.from_user.id)
+    prices = await db.get_show_prices(chat_id(callback))
 
     week, problem = await load_week(campus, lang)
     if problem:
