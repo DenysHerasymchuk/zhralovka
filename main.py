@@ -18,7 +18,7 @@ from handlers.start import router as start_router
 from i18n import LANGS, t
 from middleware import log_updates
 
-COMMANDS = ("today", "week", "prices", "subscribe", "campus", "language", "help", "start")
+COMMANDS = ("today", "week", "prices", "subscribe", "settings", "campus", "language", "help", "start")
 
 log = logging.getLogger("bot")
 

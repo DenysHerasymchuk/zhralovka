@@ -89,6 +89,7 @@ TEXTS = {
         "/week  flip through Monday to Friday\n"
         "/prices  cafeteria prices\n"
         "/subscribe  get the menu every weekday morning\n"
+        "/settings  campus, language, prices, daily menu\n"
         "/campus  change your campus\n"
         "/language  change language</blockquote>\n"
         "To share a menu, type my @username in any chat and pick a day. "
@@ -105,4 +106,5 @@ TEXTS = {
     "cmd_help": "What this bot can do",
     "cmd_start": "Start over",
     "campus_saved_group": "✅ <b>Campus set to {campus}</b>\nSend /today to see what's for lunch.",
+    "cmd_settings": "Campus, language, daily menu",
 }

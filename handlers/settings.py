@@ -32,6 +32,7 @@ async def settings_view(cid: int, campus: str | None, lang: str) -> dict:
     }
 
 
+@router.message(Command("settings"))
 @router.message(F.text.in_(all_langs("btn_settings")))
 async def show_settings(message: Message):
     campus, lang = await profile(message)

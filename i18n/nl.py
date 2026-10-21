@@ -90,6 +90,7 @@ TEXTS = {
         "/week  blader door maandag tot vrijdag\n"
         "/prices  prijzen in de cafetaria\n"
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
+        "/settings  campus, taal, prijzen, dagelijks menu\n"
         "/campus  kies een andere campus\n"
         "/language  kies een andere taal</blockquote>\n"
         "Om een menu te delen, typ mijn @gebruikersnaam in een chat en kies een dag. "
@@ -106,4 +107,5 @@ TEXTS = {
     "cmd_help": "Wat deze bot kan",
     "cmd_start": "Opnieuw beginnen",
     "campus_saved_group": "✅ <b>Campus ingesteld op {campus}</b>\nStuur /today om te zien wat er op het menu staat.",
+    "cmd_settings": "Campus, taal, dagelijks menu",
 }
