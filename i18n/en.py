@@ -104,4 +104,5 @@ TEXTS = {
     "cmd_language": "Change language",
     "cmd_help": "What this bot can do",
     "cmd_start": "Start over",
+    "campus_saved_group": "✅ <b>Campus set to {campus}</b>\nSend /today to see what's for lunch.",
 }

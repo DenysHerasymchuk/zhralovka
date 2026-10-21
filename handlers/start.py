@@ -5,9 +5,9 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
 import screens
-from handlers.common import profile
+from handlers.common import profile, reply_keyboard
 from i18n import t
-from keyboards.menu import campus_keyboard, main_keyboard
+from keyboards.menu import campus_keyboard
 
 router = Router()
 
@@ -20,7 +20,7 @@ async def start(message: Message):
         message,
         "hero",
         t(lang, "welcome", name=escape(message.from_user.first_name)),
-        reply_markup=main_keyboard(lang) if campus else None,
+        reply_markup=reply_keyboard(message, lang) if campus else None,
     )
 
     if campus:

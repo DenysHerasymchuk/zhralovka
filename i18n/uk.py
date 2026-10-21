@@ -116,4 +116,5 @@ TEXTS = {
     "cmd_language": "Змінити мову",
     "cmd_help": "Що вміє цей бот",
     "cmd_start": "Почати спочатку",
+    "campus_saved_group": "✅ <b>Кампус: {campus}</b>\nНадішли /today, щоб побачити, що на обід.",
 }

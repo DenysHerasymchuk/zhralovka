@@ -8,9 +8,9 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import chat_id, profile
+from handlers.common import chat_id, in_group, profile, reply_keyboard
 from i18n import LANGS, all_langs, day_short, t
-from keyboards.menu import campus_keyboard, language_keyboard, main_keyboard, settings_keyboard
+from keyboards.menu import campus_keyboard, language_keyboard, settings_keyboard
 from menu.models import CAMPUSES
 
 log = logging.getLogger(__name__)
@@ -67,7 +67,10 @@ async def save_campus(callback: CallbackQuery):
         # A first-time user has no bottom keyboard yet, and only a new message can add one.
         with suppress(TelegramBadRequest):
             await callback.message.delete()
-        await callback.message.answer(t(lang, "campus_saved", campus=campus), reply_markup=main_keyboard(lang))
+        if in_group(callback):
+            await callback.message.answer(t(lang, "campus_saved_group", campus=campus))
+        else:
+            await callback.message.answer(t(lang, "campus_saved", campus=campus), reply_markup=reply_keyboard(callback, lang))
     await callback.answer()
 
 
@@ -94,8 +97,9 @@ async def save_lang(callback: CallbackQuery):
     await db.set_lang(chat_id(callback), lang)
     log.info("Chat %s switched to %s", chat_id(callback), lang)
     await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))
-    # A new message is the only way to swap the bottom keyboard to the new language.
-    await callback.message.answer(t(lang, "lang_saved"), reply_markup=main_keyboard(lang))
+    # A new message is the only way to swap the bottom keyboard to the new language. Groups have none.
+    if not in_group(callback):
+        await callback.message.answer(t(lang, "lang_saved"), reply_markup=reply_keyboard(callback, lang))
     await callback.answer()
 
 
