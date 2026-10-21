@@ -3,7 +3,13 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
-from aiogram.types import BotCommand
+from aiogram.types import (
+    BotCommand,
+    BotCommandScopeAllChatAdministrators,
+    BotCommandScopeAllGroupChats,
+    BotCommandScopeAllPrivateChats,
+    BotCommandScopeDefault,
+)
 
 import db
 import notifier
@@ -20,6 +26,15 @@ from i18n import LANGS, t
 from middleware import log_updates
 
 COMMANDS = ("today", "week", "prices", "subscribe", "settings", "campus", "language", "help", "start")
+GROUP_COMMANDS = ("today", "week", "prices", "help")
+GROUP_ADMIN_COMMANDS = GROUP_COMMANDS + ("settings", "campus", "language", "subscribe")
+# Telegram shows the most specific list: admins in a group see theirs, other members the plain group list.
+COMMAND_SCOPES = (
+    (BotCommandScopeDefault(), COMMANDS),
+    (BotCommandScopeAllPrivateChats(), COMMANDS),
+    (BotCommandScopeAllGroupChats(), GROUP_COMMANDS),
+    (BotCommandScopeAllChatAdministrators(), GROUP_ADMIN_COMMANDS),
+)
 
 log = logging.getLogger("bot")
 
@@ -39,11 +54,13 @@ dp.include_routers(
 
 
 async def set_commands(bot: Bot) -> None:
-    for lang in LANGS:
-        await bot.set_my_commands(
-            [BotCommand(command=cmd, description=t(lang, f"cmd_{cmd}")) for cmd in COMMANDS],
-            language_code=None if lang == "en" else lang,
-        )
+    for scope, commands in COMMAND_SCOPES:
+        for lang in LANGS:
+            await bot.set_my_commands(
+                [BotCommand(command=cmd, description=t(lang, f"cmd_{cmd}")) for cmd in commands],
+                scope=scope,
+                language_code=None if lang == "en" else lang,
+            )
 
 
 async def main():
