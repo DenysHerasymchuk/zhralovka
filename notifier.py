@@ -4,7 +4,7 @@ import time
 from datetime import date, datetime
 
 from aiogram import Bot
-from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
+from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError, TelegramMigrateToChat
 
 import db
 import screens
@@ -24,13 +24,13 @@ log = logging.getLogger(__name__)
 async def send_due(bot: Bot, today: date, hhmm: str) -> int:
     day = today.weekday()
     by_campus: dict[str, list[tuple[int, str, bool]]] = {}
-    for user_id, campus, lang, prices in await db.subscribers_due(day, hhmm):
-        by_campus.setdefault(campus, []).append((user_id, lang, bool(prices)))
+    for chat, campus, lang, prices in await db.subscribers_due(day, hhmm):
+        by_campus.setdefault(campus, []).append((chat, lang, bool(prices)))
     if not by_campus:
         return 0
 
     sent = 0
-    for campus, users in by_campus.items():
+    for campus, chats in by_campus.items():
         try:
             week = await fetch_week(campus)
         except MenuUnavailable:
@@ -41,21 +41,27 @@ async def send_due(bot: Bot, today: date, hhmm: str) -> int:
             continue
 
         localized: dict[str, Week] = {}
-        for user_id, lang, prices in users:
+        for chat, lang, prices in chats:
             if lang not in localized:
                 localized[lang] = await localize(week, lang)
             text = format_day(localized[lang], day, lang, campus, prices)
+            markup = day_nav_keyboard(day, lang)
             try:
-                await screens.send_to(bot, user_id, "daily", text, reply_markup=day_nav_keyboard(day, lang))
+                try:
+                    await screens.send_to(bot, chat, "daily", text, reply_markup=markup)
+                except TelegramMigrateToChat as moved:
+                    # The group became a supergroup since it subscribed; follow it to the new id.
+                    await db.move_chat(chat, moved.migrate_to_chat_id)
+                    await screens.send_to(bot, moved.migrate_to_chat_id, "daily", text, reply_markup=markup)
                 sent += 1
             except TelegramForbiddenError:
-                await db.set_subscribed(user_id, False)
-                log.info("User %s blocked the bot, unsubscribed", user_id)
+                await db.set_subscribed(chat, False)
+                log.info("Chat %s blocked or removed the bot, unsubscribed", chat)
             except TelegramAPIError as exc:
-                log.warning("Daily menu to %s failed: %r", user_id, exc)
+                log.warning("Daily menu to %s failed: %r", chat, exc)
             await asyncio.sleep(SEND_INTERVAL)
 
-    log.info("Daily menu for %s sent to %d users", hhmm, sent)
+    log.info("Daily menu for %s sent to %d chats", hhmm, sent)
     return sent
 
 

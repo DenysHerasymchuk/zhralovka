@@ -1,15 +1,16 @@
 import logging
 import re
+from html import escape
 
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, ForceReply, Message
 
 import db
 import screens
-from handlers.common import admin_only, campus_prompt, chat_id, profile
+from handlers.common import admin_only, campus_prompt, chat_id, in_group, profile
 from handlers.settings import settings_view
 from i18n import t
 from keyboards.menu import campus_keyboard, notify_days_keyboard
@@ -52,7 +53,8 @@ async def subscribe(message: Message):
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
     subscribed, hhmm = await toggle_subscription(chat_id(message))
-    await message.answer(t(lang, "subscribed", time=hhmm) if subscribed else t(lang, "unsubscribed"))
+    on = "subscribed_group" if in_group(message) else "subscribed"
+    await message.answer(t(lang, on, time=hhmm) if subscribed else t(lang, "unsubscribed"))
 
 
 @router.callback_query(F.data == "settings:subscribe")
@@ -75,7 +77,13 @@ async def ask_time(callback: CallbackQuery, state: FSMContext):
     if not await admin_only(callback, lang):
         return
     await state.set_state(NotifyForm.time)
-    await callback.message.answer(t(lang, "ask_time"))
+    if in_group(callback):
+        # Bots in groups only see replies to their own messages, so ask the admin to reply.
+        user = callback.from_user
+        name = f'<a href="tg://user?id={user.id}">{escape(user.first_name)}</a>'
+        await callback.message.answer(t(lang, "ask_time_group", name=name), reply_markup=ForceReply(selective=True))
+    else:
+        await callback.message.answer(t(lang, "ask_time"))
     await callback.answer()
 
 
