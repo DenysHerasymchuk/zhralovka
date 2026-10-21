@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import admin_only, chat_id, in_group, profile, reply_keyboard
+from handlers.common import admin_only, campus_prompt, chat_id, in_group, profile, reply_keyboard
 from i18n import LANGS, all_langs, day_short, t
 from keyboards.menu import campus_keyboard, language_keyboard, settings_keyboard
 from menu.models import CAMPUSES
@@ -46,7 +46,7 @@ async def ask_campus(message: Message):
     campus, lang = await profile(message)
     if not await admin_only(message, lang):
         return
-    await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard(campus))
+    await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard(campus))
 
 
 @router.callback_query(F.data == "settings:campus")
@@ -54,7 +54,7 @@ async def ask_campus_from_settings(callback: CallbackQuery):
     campus, lang = await profile(callback)
     if not await admin_only(callback, lang):
         return
-    await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(campus), picture="location")
+    await screens.edit(callback.message, campus_prompt(callback, lang), reply_markup=campus_keyboard(campus), picture="location")
     await callback.answer()
 
 

@@ -9,6 +9,7 @@ import db
 import notifier
 from config import API_TOKEN, LOG_LEVEL
 from handlers.fallback import router as fallback_router
+from handlers.groups import router as groups_router
 from handlers.inline import router as inline_router
 from handlers.menu import router as menu_router
 from handlers.notify import router as notify_router
@@ -26,6 +27,7 @@ dp = Dispatcher()
 dp.update.outer_middleware(log_updates)
 # Order matters: notify after menu so menu buttons beat a pending time prompt; fallback last.
 dp.include_routers(
+    groups_router,
     start_router,
     settings_router,
     menu_router,

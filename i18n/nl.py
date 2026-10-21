@@ -109,4 +109,7 @@ TEXTS = {
     "campus_saved_group": "✅ <b>Campus ingesteld op {campus}</b>\nStuur /today om te zien wat er op het menu staat.",
     "cmd_settings": "Campus, taal, dagelijks menu",
     "admins_only": "🔒 Alleen groepsbeheerders kunnen dit aanpassen.",
+    "welcome_group": "<b>Hallo allemaal 👋</b>\nIk zet het menu van de Thomas More-cafetaria gewoon hier.\n\n<blockquote>/today  menu van vandaag\n/week  maandag tot vrijdag\n/prices  prijzen in de cafetaria</blockquote>\nBeheerders kiezen de campus en een dagelijks menu via /settings.",
+    "welcome_back_group": "📍 De campus van deze groep is <b>{campus}</b>. Stuur /today om te zien wat er op het menu staat.",
+    "pick_campus_group": "📍 <b>Kies de campus van deze groep</b>\nEen beheerder kan hem later aanpassen via /settings.",
 }

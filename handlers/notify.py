@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import admin_only, chat_id, profile
+from handlers.common import admin_only, campus_prompt, chat_id, profile
 from handlers.settings import settings_view
 from i18n import t
 from keyboards.menu import campus_keyboard, notify_days_keyboard
@@ -49,7 +49,7 @@ async def subscribe(message: Message):
     if not await admin_only(message, lang):
         return
     if not campus:
-        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
     subscribed, hhmm = await toggle_subscription(chat_id(message))
     await message.answer(t(lang, "subscribed", time=hhmm) if subscribed else t(lang, "unsubscribed"))
@@ -61,7 +61,7 @@ async def subscribe_from_settings(callback: CallbackQuery):
     if not await admin_only(callback, lang):
         return
     if not campus:
-        await screens.edit(callback.message, t(lang, "pick_campus"), reply_markup=campus_keyboard(), picture="location")
+        await screens.edit(callback.message, campus_prompt(callback, lang), reply_markup=campus_keyboard(), picture="location")
         await callback.answer()
         return
     await toggle_subscription(chat_id(callback))

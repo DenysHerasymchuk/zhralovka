@@ -35,6 +35,10 @@ def reply_keyboard(event: Message | CallbackQuery, lang: str) -> ReplyKeyboardMa
     return None if in_group(event) else main_keyboard(lang)
 
 
+def campus_prompt(event: Message | CallbackQuery, lang: str) -> str:
+    return t(lang, "pick_campus_group" if in_group(event) else "pick_campus")
+
+
 async def profile(event: Message | CallbackQuery) -> tuple[str | None, str]:
     """(campus, lang) of the event's chat, registering the chat on first contact."""
     cid = chat_id(event)

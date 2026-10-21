@@ -108,4 +108,7 @@ TEXTS = {
     "campus_saved_group": "✅ <b>Campus set to {campus}</b>\nSend /today to see what's for lunch.",
     "cmd_settings": "Campus, language, daily menu",
     "admins_only": "🔒 Only group admins can change this.",
+    "welcome_group": "<b>Hi everyone 👋</b>\nI post the Thomas More cafeteria menu right here.\n\n<blockquote>/today  today's menu\n/week  Monday to Friday\n/prices  cafeteria prices</blockquote>\nAdmins can set the campus and a daily menu in /settings.",
+    "welcome_back_group": "📍 This group's campus is <b>{campus}</b>. Send /today to see what's for lunch.",
+    "pick_campus_group": "📍 <b>Pick this group's campus</b>\nAn admin can change it later in /settings.",
 }

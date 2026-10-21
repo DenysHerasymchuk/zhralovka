@@ -78,6 +78,14 @@ async def add_user(chat_id: int, lang: str) -> None:
         await db.commit()
 
 
+async def move_chat(old_id: int, new_id: int) -> None:
+    """Carry a group's settings over when Telegram upgrades it to a supergroup with a new id."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE OR IGNORE users SET user_id = ? WHERE user_id = ?", (new_id, old_id))
+        await db.execute("DELETE FROM users WHERE user_id = ?", (old_id,))
+        await db.commit()
+
+
 async def _set(chat_id: int, column: str, value: str | int) -> None:
     # column comes from the callers below, never from user input
     async with aiosqlite.connect(DB_PATH) as db:
