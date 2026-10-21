@@ -1,4 +1,17 @@
-# Menubot
+<p align="center">
+  <img src="src/pictures/hero.jpeg" alt="Zhralovka banner" width="100%">
+</p>
+
+<h1 align="center">Menubot</h1>
+
+<p align="center">
+  <a href="https://github.com/DenysHerasymchuk/zhralovka/actions/workflows/ci.yml"><img src="https://github.com/DenysHerasymchuk/zhralovka/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI/CD"></a>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/aiogram-3.31-2CA5E0?logo=telegram&logoColor=white" alt="aiogram 3.31">
+  <img src="https://img.shields.io/badge/SQLite-aiosqlite-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/languages-EN%20%7C%20NL%20%7C%20UK-F5B800" alt="Languages: EN, NL, UK">
+</p>
 
 A Telegram bot that shows the Thomas More cafeteria menu. You pick your campus once and the bot remembers it, along with your language: English, Dutch or Ukrainian.
 
