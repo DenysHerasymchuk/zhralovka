@@ -89,6 +89,7 @@ TEXTS = {
         "/week  flip through Monday to Friday\n"
         "/prices  cafeteria prices\n"
         "/subscribe  get the menu every weekday morning\n"
+        "/settings  campus, language, prices, daily menu\n"
         "/campus  change your campus\n"
         "/language  change language</blockquote>\n"
         "To share a menu, type my @username in any chat and pick a day. "
@@ -104,4 +105,12 @@ TEXTS = {
     "cmd_language": "Change language",
     "cmd_help": "What this bot can do",
     "cmd_start": "Start over",
+    "campus_saved_group": "✅ <b>Campus set to {campus}</b>\nSend /today to see what's for lunch.",
+    "cmd_settings": "Campus, language, daily menu",
+    "admins_only": "🔒 Only group admins can change this.",
+    "welcome_group": "<b>Hi everyone 👋</b>\nI post the Thomas More cafeteria menu right here.\n\n<blockquote>/today  today's menu\n/week  Monday to Friday\n/prices  cafeteria prices</blockquote>\nAdmins can set the campus and a daily menu in /settings.",
+    "welcome_back_group": "📍 This group's campus is <b>{campus}</b>. Send /today to see what's for lunch.",
+    "pick_campus_group": "📍 <b>Pick this group's campus</b>\nAn admin can change it later in /settings.",
+    "subscribed_group": "🔔 <b>Daily menu on</b>\nI'll post the menu here at {time}. Admins can change the time and days in /settings, or send /subscribe again to stop.",
+    "ask_time_group": "⏰ <b>When should I post it?</b>\n{name}, reply to this message with a time, e.g. 10:45.",
 }
