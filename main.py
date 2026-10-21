@@ -14,6 +14,7 @@ from aiogram.types import (
 import db
 import notifier
 from config import API_TOKEN, LOG_LEVEL
+from handlers.clear import router as clear_router
 from handlers.fallback import router as fallback_router
 from handlers.groups import router as groups_router
 from handlers.inline import router as inline_router
@@ -25,9 +26,9 @@ from handlers.start import router as start_router
 from i18n import LANGS, t
 from middleware import log_updates
 
-COMMANDS = ("today", "week", "prices", "subscribe", "settings", "campus", "language", "help", "start")
+COMMANDS = ("today", "week", "prices", "subscribe", "settings", "campus", "language", "clear", "help", "start")
 GROUP_COMMANDS = ("today", "week", "prices", "help")
-GROUP_ADMIN_COMMANDS = GROUP_COMMANDS + ("settings", "campus", "language", "subscribe")
+GROUP_ADMIN_COMMANDS = GROUP_COMMANDS + ("settings", "campus", "language", "subscribe", "clear")
 # Telegram shows the most specific list: admins in a group see theirs, other members the plain group list.
 COMMAND_SCOPES = (
     (BotCommandScopeDefault(), COMMANDS),
@@ -47,6 +48,7 @@ dp.include_routers(
     settings_router,
     menu_router,
     prices_router,
+    clear_router,
     inline_router,
     notify_router,
     fallback_router,

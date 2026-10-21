@@ -91,6 +91,7 @@ TEXTS = {
         "/subscribe  get the menu every weekday morning\n"
         "/settings  campus, language, prices, daily menu\n"
         "/campus  change your campus\n"
+        "/clear  remove the buttons at the bottom\n"
         "/language  change language</blockquote>\n"
         "To share a menu, type my @username in any chat and pick a day. "
         "Add a campus name to see another campus.\n\n"
@@ -113,4 +114,7 @@ TEXTS = {
     "pick_campus_group": "📍 <b>Pick this group's campus</b>\nAn admin can change it later in /settings.",
     "subscribed_group": "🔔 <b>Daily menu on</b>\nI'll post the menu here at {time}. Admins can change the time and days in /settings, or send /subscribe again to stop.",
     "ask_time_group": "⏰ <b>When should I post it?</b>\n{name}, reply to this message with a time, e.g. 10:45.",
+    "menu_cleared": "🧹 <b>Menu cleared</b>\nThe buttons are gone. Send /start to bring them back.",
+    "menu_cleared_group": "🧹 <b>Menu cleared</b>\nAny leftover buttons are gone for everyone here.",
+    "cmd_clear": "Remove the bottom menu",
 }
