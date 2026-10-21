@@ -92,6 +92,7 @@ TEXTS = {
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
         "/settings  campus, taal, prijzen, dagelijks menu\n"
         "/campus  kies een andere campus\n"
+        "/clear  verwijder de knoppen onderaan\n"
         "/language  kies een andere taal</blockquote>\n"
         "Om een menu te delen, typ mijn @gebruikersnaam in een chat en kies een dag. "
         "Zet er een campusnaam achter voor een andere campus.\n\n"
@@ -114,4 +115,7 @@ TEXTS = {
     "pick_campus_group": "📍 <b>Kies de campus van deze groep</b>\nEen beheerder kan hem later aanpassen via /settings.",
     "subscribed_group": "🔔 <b>Dagelijks menu aan</b>\nIk zet het menu hier om {time}. Beheerders passen tijdstip en dagen aan via /settings, of sturen /subscribe opnieuw om te stoppen.",
     "ask_time_group": "⏰ <b>Wanneer moet ik het posten?</b>\n{name}, antwoord op dit bericht met een tijdstip, bv. 10:45.",
+    "menu_cleared": "🧹 <b>Menu verwijderd</b>\nDe knoppen zijn weg. Stuur /start om ze terug te krijgen.",
+    "menu_cleared_group": "🧹 <b>Menu verwijderd</b>\nAchtergebleven knoppen zijn hier voor iedereen weg.",
+    "cmd_clear": "Menu onderaan verwijderen",
 }
