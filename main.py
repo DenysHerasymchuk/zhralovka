@@ -25,8 +25,8 @@ from handlers.start import router as start_router
 from i18n import LANGS, t
 from middleware import log_updates
 
-COMMANDS = ("today", "week", "prices", "subscribe", "settings", "campus", "language", "clear", "help", "start")
-GROUP_COMMANDS = ("today", "week", "prices", "help")
+COMMANDS = ("today", "shortm", "week", "prices", "subscribe", "settings", "campus", "language", "clear", "help", "start")
+GROUP_COMMANDS = ("today", "shortm", "week", "prices", "help")
 GROUP_ADMIN_COMMANDS = GROUP_COMMANDS + ("settings", "campus", "language", "subscribe", "clear")
 # Telegram shows the most specific list: admins in a group see theirs, other members the plain group list.
 COMMAND_SCOPES = (

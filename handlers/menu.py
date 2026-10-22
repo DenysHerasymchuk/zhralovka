@@ -10,13 +10,14 @@ from aiogram.types import CallbackQuery, Message
 import db
 import screens
 from config import TIMEZONE
-from formatting import format_day, pick_day
+from formatting import format_day, format_hot_meal, pick_day
 from handlers.common import campus_prompt, chat_id, profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
 from menu.models import Week, covers
 from menu.translate import localize
+from screens import NO_PREVIEW
 
 router = Router()
 
@@ -35,6 +36,18 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
     return await localize(week, lang), None
 
 
+async def load_today(campus: str, lang: str) -> tuple[Week | None, int, str | None]:
+    """(week, today's index, None), or a message saying why there's no menu today."""
+    now = today()
+    day, weekend = pick_day(now)
+    if weekend:
+        return None, day, t(lang, "weekend", day=day_name(lang, now.weekday()))
+    week, problem = await load_week(campus, lang)
+    if not problem and not covers(week, now):
+        problem = t(lang, "no_menu", campus=campus)
+    return week, day, problem
+
+
 @router.message(Command("today", "menu"))
 @router.message(F.text.in_(all_langs("btn_today")))
 async def show_today(message: Message):
@@ -43,20 +56,25 @@ async def show_today(message: Message):
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
 
-    now = today()
-    day, weekend = pick_day(now)
-    if weekend:
-        await message.answer(t(lang, "weekend", day=day_name(lang, now.weekday())))
-        return
-
-    week, problem = await load_week(campus, lang)
-    if not problem and not covers(week, now):
-        problem = t(lang, "no_menu", campus=campus)
+    week, day, problem = await load_today(campus, lang)
     if problem:
         await message.answer(problem)
         return
     prices = await db.get_show_prices(chat_id(message))
     await screens.send(message, "today", format_day(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang))
+
+
+@router.message(Command("shortm"))
+async def show_hot_meal(message: Message):
+    """Today's hot meal as a plain text reply: no picture, no buttons, no link preview."""
+    campus, lang = await profile(message)
+    if not campus:
+        await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
+        return
+
+    week, day, problem = await load_today(campus, lang)
+    text = problem or format_hot_meal(week, day, lang) or t(lang, "no_hot_meal")
+    await message.reply(text, link_preview_options=NO_PREVIEW)
 
 
 @router.message(Command("week"))
