@@ -233,7 +233,7 @@ class CommandMenusTest(unittest.IsolatedAsyncioTestCase):
             (type(c.kwargs["scope"]).__name__, c.kwargs["language_code"]): [x.command for x in c.args[0]]
             for c in b.set_my_commands.await_args_list
         }
-        self.assertEqual(lists["BotCommandScopeAllGroupChats", None], ["today", "week", "prices", "help"])
+        self.assertEqual(lists["BotCommandScopeAllGroupChats", None], ["today", "shortm", "week", "prices", "help"])
         self.assertIn("settings", lists["BotCommandScopeAllChatAdministrators", "uk"])
         self.assertNotIn("start", lists["BotCommandScopeAllChatAdministrators", None])
         self.assertIn("settings", lists["BotCommandScopeAllPrivateChats", "nl"])

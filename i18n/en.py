@@ -83,6 +83,7 @@ TEXTS = {
     "help": (
         "❓ <b>What I can do</b>\n\n"
         "<blockquote>/today or /menu  today's menu\n"
+        "/shortm  just today's hot meal\n"
         "/week  flip through Monday to Friday\n"
         "/prices  cafeteria prices\n"
         "/subscribe  get the menu every weekday morning\n"
@@ -112,4 +113,6 @@ TEXTS = {
     "menu_cleared": "🧹 <b>Menu cleared</b>\nThe buttons are gone. Send /start to bring them back.",
     "menu_cleared_group": "🧹 <b>Menu cleared</b>\nAny leftover buttons are gone for everyone here.",
     "cmd_clear": "Remove the bottom menu",
+    "no_hot_meal": "🤷 No hot meal listed today.",
+    "cmd_shortm": "Today's hot meal, short",
 }
