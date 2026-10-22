@@ -11,7 +11,7 @@ import db
 import screens
 from config import TIMEZONE
 from formatting import format_day, format_hot_meal, pick_day
-from handlers.common import campus_prompt, chat_id, profile
+from handlers.common import button_command, campus_prompt, chat_id, may_use, profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
@@ -52,6 +52,8 @@ async def load_today(campus: str, lang: str) -> tuple[Week | None, int, str | No
 @router.message(F.text.in_(all_langs("btn_today")))
 async def show_today(message: Message):
     campus, lang = await profile(message)
+    if not await may_use(message, "today", lang):
+        return
     if not campus:
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
@@ -68,6 +70,8 @@ async def show_today(message: Message):
 async def show_hot_meal(message: Message):
     """Today's hot meal as a text reply with day buttons: no picture, no link preview."""
     campus, lang = await profile(message)
+    if not await may_use(message, "shortm", lang):
+        return
     if not campus:
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
@@ -88,6 +92,8 @@ async def show_hot_meal(message: Message):
 async def switch_hot_meal(callback: CallbackQuery):
     """⬅️/➡️ under /shortm: the same message, another day's hot meal."""
     campus, lang = await profile(callback)
+    if not await may_use(callback, button_command(callback), lang):
+        return
     day = callback.data.removeprefix("hot:")
     if not campus or day not in {"0", "1", "2", "3", "4"}:
         await callback.answer()
@@ -108,6 +114,8 @@ async def switch_hot_meal(callback: CallbackQuery):
 @router.message(F.text.in_(all_langs("btn_week")))
 async def show_week(message: Message):
     campus, lang = await profile(message)
+    if not await may_use(message, "week", lang):
+        return
     if not campus:
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
@@ -127,6 +135,8 @@ async def show_week(message: Message):
 @router.callback_query(F.data.startswith(("day:", "nav:")))
 async def switch_day(callback: CallbackQuery):
     campus, lang = await profile(callback)
+    if not await may_use(callback, button_command(callback), lang):
+        return
     kind, _, day = callback.data.partition(":")
     if not campus or day not in {"0", "1", "2", "3", "4"}:
         await callback.answer()

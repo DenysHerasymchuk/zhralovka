@@ -7,7 +7,7 @@ from aiogram.methods import GetChatMember, SendPhoto
 from aiogram.types import ForceReply, ReplyKeyboardMarkup
 
 import db
-import main
+import commands
 import notifier
 from handlers import fallback, groups, menu, notify, settings, start
 from handlers.common import is_admin
@@ -228,7 +228,7 @@ class CommandMenusTest(unittest.IsolatedAsyncioTestCase):
     async def test_each_audience_gets_its_own_list(self):
         b = MagicMock()
         b.set_my_commands = AsyncMock()
-        await main.set_commands(b)
+        await commands.set_commands(b)
         lists = {
             (type(c.kwargs["scope"]).__name__, c.kwargs["language_code"]): [x.command for x in c.args[0]]
             for c in b.set_my_commands.await_args_list

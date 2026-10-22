@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 
 import screens
 from formatting import format_prices
-from handlers.common import profile
+from handlers.common import may_use, profile
 from keyboards.menu import prices_keyboard
 from menu.prices import SECTIONS
 
@@ -17,6 +17,8 @@ router = Router()
 @router.message(Command("prices", "price"))
 async def show_prices(message: Message):
     _, lang = await profile(message)
+    if not await may_use(message, "prices", lang):
+        return
     await screens.send(message, "menu", format_prices(0, lang), reply_markup=prices_keyboard(0))
 
 
@@ -28,6 +30,8 @@ async def switch_section(callback: CallbackQuery):
         return
     section = int(choice)
     _, lang = await profile(callback)
+    if not await may_use(callback, "prices", lang):
+        return
     # Tapping the open section raises "message is not modified".
     with suppress(TelegramBadRequest):
         await screens.edit(callback.message, format_prices(section, lang), reply_markup=prices_keyboard(section))

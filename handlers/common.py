@@ -1,7 +1,6 @@
 import logging
 
 from aiogram.exceptions import TelegramAPIError
-
 from aiogram.types import CallbackQuery, Chat, Message, ReplyKeyboardMarkup
 
 import db
@@ -11,6 +10,10 @@ from keyboards.menu import main_keyboard
 log = logging.getLogger(__name__)
 
 ADMIN_STATUSES = {"creator", "administrator"}
+# Commands a group's admins can keep to themselves. Settings-type commands are always admins-only.
+CONTROLLED_COMMANDS = ("today", "shortm", "week", "prices", "help")
+# Buttons under a message follow the rule of the command that posted it.
+BUTTON_COMMANDS = {"nav": "today", "day": "week", "hot": "shortm", "prices": "prices"}
 
 
 def _chat(event: Message | CallbackQuery) -> Chat | None:
@@ -76,3 +79,21 @@ async def admin_only(event: Message | CallbackQuery, lang: str) -> bool:
     else:
         await event.answer(t(lang, "admins_only"))
     return False
+
+
+async def may_use(event: Message | CallbackQuery, command: str, lang: str) -> bool:
+    """False, after telling the member, if this group has kept the command to its admins."""
+    if not in_group(event) or command not in await db.get_admin_commands(chat_id(event)):
+        return True
+    if await is_admin(event):
+        return True
+    text = t(lang, "command_admins_only", command=command)
+    if isinstance(event, CallbackQuery):
+        await event.answer(text, show_alert=True)
+    else:
+        await event.answer(text)
+    return False
+
+
+def button_command(callback: CallbackQuery) -> str:
+    return BUTTON_COMMANDS[callback.data.partition(":")[0]]

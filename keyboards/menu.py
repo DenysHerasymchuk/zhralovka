@@ -58,7 +58,7 @@ def day_nav_keyboard(day: int, lang: str, prefix: str = "nav") -> InlineKeyboard
     return InlineKeyboardMarkup(inline_keyboard=[buttons]) if buttons else None
 
 
-def settings_keyboard(lang: str, subscribed: bool, show_prices: bool) -> InlineKeyboardMarkup:
+def settings_keyboard(lang: str, subscribed: bool, show_prices: bool, group: bool = False) -> InlineKeyboardMarkup:
     daily = t(lang, "btn_daily_off" if subscribed else "btn_daily_on")
     prices = t(lang, "btn_hide_prices" if show_prices else "btn_show_prices")
     rows = [
@@ -72,6 +72,21 @@ def settings_keyboard(lang: str, subscribed: bool, show_prices: bool) -> InlineK
             InlineKeyboardButton(text=t(lang, "btn_change_time"), callback_data="settings:time"),
             InlineKeyboardButton(text=t(lang, "btn_change_days"), callback_data="settings:days"),
         ])
+    if group:
+        rows.append([InlineKeyboardButton(text=t(lang, "btn_command_access"), callback_data="settings:access")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def access_keyboard(commands, restricted: set[str], lang: str) -> InlineKeyboardMarkup:
+    """One row per command, tap to switch between everyone and admins only."""
+    rows = [
+        [InlineKeyboardButton(
+            text=f"/{cmd} · {t(lang, 'access_admins' if cmd in restricted else 'access_everyone')}",
+            callback_data=f"access:{cmd}",
+        )]
+        for cmd in commands
+    ]
+    rows.append([InlineKeyboardButton(text=t(lang, "btn_done"), callback_data="access:done")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 

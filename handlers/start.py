@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
 import screens
-from handlers.common import in_group, profile, reply_keyboard
+from handlers.common import in_group, may_use, profile, reply_keyboard
 from i18n import t
 from keyboards.menu import campus_keyboard
 
@@ -43,4 +43,6 @@ async def greet_group(message: Message, campus: str | None, lang: str) -> None:
 @router.message(Command("help"))
 async def help_(message: Message):
     _, lang = await profile(message)
+    if not await may_use(message, "help", lang):
+        return
     await screens.send(message, "share", t(lang, "help"))

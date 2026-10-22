@@ -8,9 +8,10 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
-from handlers.common import admin_only, campus_prompt, chat_id, in_group, profile, reply_keyboard
+from commands import set_chat_commands
+from handlers.common import CONTROLLED_COMMANDS, admin_only, campus_prompt, chat_id, in_group, profile, reply_keyboard
 from i18n import LANGS, all_langs, day_short, t
-from keyboards.menu import campus_keyboard, language_keyboard, settings_keyboard
+from keyboards.menu import access_keyboard, campus_keyboard, language_keyboard, settings_keyboard
 from menu.models import CAMPUSES
 
 log = logging.getLogger(__name__)
@@ -28,7 +29,8 @@ async def settings_view(cid: int, campus: str | None, lang: str) -> dict:
     prices = t(lang, "daily_on" if show_prices else "daily_off")
     return {
         "text": t(lang, "settings", campus=campus or t(lang, "no_campus"), daily=daily, prices=prices),
-        "reply_markup": settings_keyboard(lang, subscribed, show_prices),
+        # Group chat ids are negative, user ids positive.
+        "reply_markup": settings_keyboard(lang, subscribed, show_prices, group=cid < 0),
     }
 
 
@@ -127,4 +129,43 @@ async def toggle_prices(callback: CallbackQuery):
     await db.set_show_prices(chat_id(callback), show)
     log.info("Chat %s turned menu prices %s", chat_id(callback), "on" if show else "off")
     await screens.edit(callback.message, **await settings_view(chat_id(callback), campus, lang))
+    await callback.answer()
+
+
+def access_view(restricted: set[str], lang: str) -> dict:
+    return {"text": t(lang, "command_access"), "reply_markup": access_keyboard(CONTROLLED_COMMANDS, restricted, lang)}
+
+
+@router.callback_query(F.data == "settings:access")
+async def show_access(callback: CallbackQuery):
+    _, lang = await profile(callback)
+    if not in_group(callback):  # only groups have members to restrict
+        await callback.answer()
+        return
+    if not await admin_only(callback, lang):
+        return
+    await screens.edit(callback.message, **access_view(await db.get_admin_commands(chat_id(callback)), lang))
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("access:"))
+async def toggle_access(callback: CallbackQuery):
+    campus, lang = await profile(callback)
+    choice = callback.data.removeprefix("access:")
+    if not in_group(callback) or (choice != "done" and choice not in CONTROLLED_COMMANDS):
+        await callback.answer()
+        return
+    if not await admin_only(callback, lang):
+        return
+    cid = chat_id(callback)
+    if choice == "done":
+        await screens.edit(callback.message, **await settings_view(cid, campus, lang))
+        await callback.answer()
+        return
+
+    restricted = await db.get_admin_commands(cid) ^ {choice}
+    await db.set_admin_commands(cid, restricted)
+    await set_chat_commands(callback.bot, cid, restricted)
+    log.info("Chat %s: /%s is now for %s", cid, choice, "admins" if choice in restricted else "everyone")
+    await screens.edit(callback.message, **access_view(restricted, lang))
     await callback.answer()

@@ -34,6 +34,13 @@ class DbTest(unittest.IsolatedAsyncioTestCase):
         await db.set_campus(1, "Lier")
         self.assertEqual(await db.get_user(1), ("Lier", "en"))
 
+    async def test_admin_commands_round_trip(self):
+        self.assertEqual(await db.get_admin_commands(-100), set())
+        await db.set_admin_commands(-100, {"week", "prices"})
+        self.assertEqual(await db.get_admin_commands(-100), {"week", "prices"})
+        await db.set_admin_commands(-100, set())
+        self.assertEqual(await db.get_admin_commands(-100), set())
+
     async def test_notify_defaults(self):
         self.assertEqual(await db.get_notify(1), (False, "11:00", "01234"))
         await db.add_user(1, "en")

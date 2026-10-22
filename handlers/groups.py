@@ -6,6 +6,7 @@ from aiogram.types import ChatMemberUpdated, Message
 
 import db
 import screens
+from commands import set_chat_commands
 from i18n import detect_lang, t
 from keyboards.menu import campus_keyboard
 
@@ -41,4 +42,7 @@ async def removed_from_group(event: ChatMemberUpdated):
 @router.message(F.migrate_from_chat_id)
 async def group_upgraded(message: Message):
     await db.move_chat(message.migrate_from_chat_id, message.chat.id)
+    # Telegram's per-chat command menus don't move with the group.
+    if restricted := await db.get_admin_commands(message.chat.id):
+        await set_chat_commands(message.bot, message.chat.id, restricted)
     log.info("Group %s became supergroup %s", message.migrate_from_chat_id, message.chat.id)
