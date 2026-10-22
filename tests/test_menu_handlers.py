@@ -7,11 +7,13 @@ from handlers import menu
 from i18n import TEXTS
 from menu.client import MenuUnavailable
 from tests.helpers import (
+    GROUP,
     SATURDAY,
     TUESDAY,
     WEEK,
     HandlerTestCase,
     callback,
+    group_message,
     message,
     sent_markup,
     sent_picture,
@@ -214,3 +216,54 @@ class SharedChatTest(HandlerTestCase):
         with patch("handlers.menu.today", return_value=TUESDAY), patch("handlers.menu.fetch_week", fetch):
             await menu.show_today(msg)
         self.assertEqual(fetch.await_args.args[0], "Lier")
+
+
+class HotMealTest(HandlerTestCase):
+    async def shortm(self, msg, when=TUESDAY, week=WEEK):
+        msg.reply = AsyncMock()
+        with patch("handlers.menu.today", return_value=when), \
+             patch("handlers.menu.fetch_week", AsyncMock(return_value=week)):
+            await menu.show_hot_meal(msg)
+        return msg.reply.await_args
+
+    async def test_replies_with_just_the_lunch_as_a_link(self):
+        await db.set_campus(42, "Geel")
+        msg = message("/shortm")
+        call = await self.shortm(msg)
+        text = call.args[0]
+        self.assertEqual(text.count("\n"), 0)
+        self.assertIn(">Tuesday pasta</a>", text)
+        self.assertIn('href="https://www.google.com/search?tbm=isch&amp;q=Tuesday+pasta"', text)
+        self.assertNotIn("soup", text.lower())
+        self.assertTrue(call.kwargs["link_preview_options"].is_disabled)
+        self.assertNotIn("reply_markup", call.kwargs)
+        msg.answer_photo.assert_not_awaited()
+
+    async def test_works_in_a_group_for_any_member(self):
+        await db.set_campus(GROUP, "Geel")
+        msg = group_message("/shortm")
+        call = await self.shortm(msg)
+        self.assertIn(">Tuesday pasta</a>", call.args[0])
+        msg.bot.get_chat_member.assert_not_awaited()
+
+    async def test_weekend(self):
+        await db.set_campus(42, "Geel")
+        call = await self.shortm(message("/shortm"), when=SATURDAY)
+        self.assertIn("It's Saturday", call.args[0])
+
+    async def test_last_weeks_menu_says_no_menu(self):
+        await db.set_campus(42, "Geel")
+        call = await self.shortm(message("/shortm"), when=TUESDAY + timedelta(days=7))
+        self.assertIn("Geel hasn't published", call.args[0])
+
+    async def test_day_without_a_lunch(self):
+        await db.set_campus(42, "Geel")
+        soup_only = WEEK._replace(days={**WEEK.days, "Tuesday": WEEK.days["Tuesday"][:1]})
+        call = await self.shortm(message("/shortm"), week=soup_only)
+        self.assertEqual(call.args[0], TEXTS["en"]["no_hot_meal"])
+
+    async def test_no_campus_asks_for_one(self):
+        msg = message("/shortm")
+        msg.reply = AsyncMock()
+        await menu.show_hot_meal(msg)
+        self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])
