@@ -72,9 +72,6 @@ TEXTS = {
     ),
     "no_dishes": "<i>Er staat niets gepland op {day}. Waarschijnlijk een vrije dag.</i>",
 
-    # Inline mode
-    "inline_pick_campus": "📍 Kies eerst je campus",
-    "inline_no_dishes": "Niets gepland",
 
     # Errors
     "unavailable": (
@@ -94,8 +91,6 @@ TEXTS = {
         "/campus  kies een andere campus\n"
         "/clear  verwijder de knoppen onderaan\n"
         "/language  kies een andere taal</blockquote>\n"
-        "Om een menu te delen, typ mijn @gebruikersnaam in een chat en kies een dag. "
-        "Zet er een campusnaam achter voor een andere campus.\n\n"
         "De menu's komen rechtstreeks van de Thomas More-keukens. Klopt er "
         "iets niet, dan ligt dat aan de keuken."
     ),

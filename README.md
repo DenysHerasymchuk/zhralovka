@@ -26,10 +26,12 @@
 | `/week`      | Monday to Friday                     |
 | `/prices`    | Cafeteria price board                |
 | `/subscribe` | Daily menu on or off (default 11:00) |
+| `/settings`  | Campus, language, prices, daily menu |
 | `/campus`    | Change campus                        |
 | `/language`  | English, Dutch or Ukrainian          |
+| `/clear`     | Remove the buttons at the bottom     |
 
-Type `@zhralovkabot` in any chat to share a day's menu there.
+Works in groups too. Admins set the group's campus and daily menu; everyone can ask for the menu.
 
 Campuses: Antwerpen, De Nayer, Geel, Lier, Mechelen, Turnhout, Vorselaar.
 
@@ -70,7 +72,7 @@ Every push and PR runs the tests. A merge to `main` also builds the image, pushe
 3. Copy the deploy webhook URL and create an API token.
 4. Add both to GitHub Actions secrets as `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN`. Without them the image still publishes and the redeploy is skipped.
 
-For inline sharing, send `/setinline` to @BotFather once and set the placeholder to `Campus (optional), e.g. Geel`.
+In @BotFather, keep Group Privacy on and inline mode off (`/setinline`).
 
 </details>
 
