@@ -11,7 +11,7 @@ import db
 import screens
 from config import TIMEZONE
 from formatting import format_day, pick_day
-from handlers.common import chat_id, profile
+from handlers.common import campus_prompt, chat_id, profile
 from i18n import all_langs, day_name, t
 from keyboards.menu import campus_keyboard, days_keyboard, day_nav_keyboard
 from menu.client import MenuUnavailable, fetch_week
@@ -40,7 +40,7 @@ async def load_week(campus: str, lang: str) -> tuple[Week | None, str | None]:
 async def show_today(message: Message):
     campus, lang = await profile(message)
     if not campus:
-        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
 
     now = today()
@@ -64,7 +64,7 @@ async def show_today(message: Message):
 async def show_week(message: Message):
     campus, lang = await profile(message)
     if not campus:
-        await screens.send(message, "location", t(lang, "pick_campus"), reply_markup=campus_keyboard())
+        await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
 
     week, problem = await load_week(campus, lang)

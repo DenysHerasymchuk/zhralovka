@@ -72,9 +72,6 @@ TEXTS = {
     ),
     "no_dishes": "<i>Er staat niets gepland op {day}. Waarschijnlijk een vrije dag.</i>",
 
-    # Inline mode
-    "inline_pick_campus": "📍 Kies eerst je campus",
-    "inline_no_dishes": "Niets gepland",
 
     # Errors
     "unavailable": (
@@ -90,10 +87,10 @@ TEXTS = {
         "/week  blader door maandag tot vrijdag\n"
         "/prices  prijzen in de cafetaria\n"
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
+        "/settings  campus, taal, prijzen, dagelijks menu\n"
         "/campus  kies een andere campus\n"
+        "/clear  verwijder de knoppen onderaan\n"
         "/language  kies een andere taal</blockquote>\n"
-        "Om een menu te delen, typ mijn @gebruikersnaam in een chat en kies een dag. "
-        "Zet er een campusnaam achter voor een andere campus.\n\n"
         "De menu's komen rechtstreeks van de Thomas More-keukens. Klopt er "
         "iets niet, dan ligt dat aan de keuken."
     ),
@@ -105,4 +102,15 @@ TEXTS = {
     "cmd_language": "Andere taal",
     "cmd_help": "Wat deze bot kan",
     "cmd_start": "Opnieuw beginnen",
+    "campus_saved_group": "✅ <b>Campus ingesteld op {campus}</b>\nStuur /today om te zien wat er op het menu staat.",
+    "cmd_settings": "Campus, taal, dagelijks menu",
+    "admins_only": "🔒 Alleen groepsbeheerders kunnen dit aanpassen.",
+    "welcome_group": "<b>Hallo allemaal 👋</b>\nIk zet het menu van de Thomas More-cafetaria gewoon hier.\n\n<blockquote>/today  menu van vandaag\n/week  maandag tot vrijdag\n/prices  prijzen in de cafetaria</blockquote>\nBeheerders kiezen de campus en een dagelijks menu via /settings.",
+    "welcome_back_group": "📍 De campus van deze groep is <b>{campus}</b>. Stuur /today om te zien wat er op het menu staat.",
+    "pick_campus_group": "📍 <b>Kies de campus van deze groep</b>\nEen beheerder kan hem later aanpassen via /settings.",
+    "subscribed_group": "🔔 <b>Dagelijks menu aan</b>\nIk zet het menu hier om {time}. Beheerders passen tijdstip en dagen aan via /settings, of sturen /subscribe opnieuw om te stoppen.",
+    "ask_time_group": "⏰ <b>Wanneer moet ik het posten?</b>\n{name}, antwoord op dit bericht met een tijdstip, bv. 10:45.",
+    "menu_cleared": "🧹 <b>Menu verwijderd</b>\nDe knoppen zijn weg. Stuur /start om ze terug te krijgen.",
+    "menu_cleared_group": "🧹 <b>Menu verwijderd</b>\nAchtergebleven knoppen zijn hier voor iedereen weg.",
+    "cmd_clear": "Menu onderaan verwijderen",
 }
