@@ -100,6 +100,9 @@ async def save_time(message: Message, state: FSMContext):
     hhmm = parse_time(message.text)
     # One try only, so a forgotten prompt doesn't swallow the user's messages later on.
     await state.clear()
+    # The prompt is per person, but they may have lost admin rights since asking for it.
+    if not await admin_only(message, lang):
+        return
     if not hhmm:
         await message.answer(t(lang, "bad_time"))
         return
