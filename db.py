@@ -10,6 +10,8 @@ LATER_COLUMNS = {
     "notify_time": f"TEXT NOT NULL DEFAULT '{DEFAULT_TIME}'",
     "notify_days": f"TEXT NOT NULL DEFAULT '{DEFAULT_DAYS}'",
     "show_prices": "INTEGER NOT NULL DEFAULT 0",
+    # Space-separated commands only a group's admins may use; empty means all open.
+    "admin_commands": "TEXT NOT NULL DEFAULT ''",
 }
 
 
@@ -150,3 +152,14 @@ async def subscribers_due(weekday: int, hhmm: str) -> list[tuple[int, str, str, 
             (hhmm, str(weekday)),
         ) as cursor:
             return await cursor.fetchall()
+
+
+async def get_admin_commands(chat_id: int) -> set[str]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT admin_commands FROM users WHERE user_id = ?", (chat_id,)) as cursor:
+            row = await cursor.fetchone()
+    return set(row[0].split()) if row else set()
+
+
+async def set_admin_commands(chat_id: int, commands: set[str]) -> None:
+    await _set(chat_id, "admin_commands", " ".join(sorted(commands)))
