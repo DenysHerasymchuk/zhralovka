@@ -237,7 +237,7 @@ class HotMealTest(HandlerTestCase):
         self.assertIn('href="https://www.google.com/search?tbm=isch&amp;q=Tuesday+pasta"', text)
         self.assertNotIn("soup", text.lower())
         self.assertTrue(call.kwargs["link_preview_options"].is_disabled)
-        self.assertNotIn("reply_markup", call.kwargs)
+        self.assertEqual([b.callback_data for b in call.kwargs["reply_markup"].inline_keyboard[0]], ["hot:0", "hot:2"])
         msg.answer_photo.assert_not_awaited()
 
     async def test_works_in_a_group_for_any_member(self):
@@ -267,7 +267,7 @@ class HotMealTest(HandlerTestCase):
         await db.set_campus(42, "Geel")
         soup_only = WEEK._replace(days={**WEEK.days, "Tuesday": WEEK.days["Tuesday"][:1]})
         call = await self.shortm(message("/shortm"), week=soup_only)
-        self.assertEqual(call.args[0], TEXTS["en"]["no_hot_meal"])
+        self.assertTrue(call.args[0].endswith("📍 Geel\n" + TEXTS["en"]["no_hot_meal"]))
 
     async def test_no_campus_asks_for_one(self):
         msg = message("/shortm")

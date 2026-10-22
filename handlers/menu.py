@@ -66,16 +66,42 @@ async def show_today(message: Message):
 
 @router.message(Command("shortm"))
 async def show_hot_meal(message: Message):
-    """Today's hot meal as a plain text reply: no picture, no buttons, no link preview."""
+    """Today's hot meal as a text reply with day buttons: no picture, no link preview."""
     campus, lang = await profile(message)
     if not campus:
         await screens.send(message, "location", campus_prompt(message, lang), reply_markup=campus_keyboard())
         return
 
     week, day, problem = await load_today(campus, lang)
-    prices = not problem and await db.get_show_prices(chat_id(message))
-    text = problem or format_hot_meal(week, day, lang, campus, prices) or t(lang, "no_hot_meal")
-    await message.reply(text, link_preview_options=NO_PREVIEW)
+    if problem:
+        await message.reply(problem)
+        return
+    prices = await db.get_show_prices(chat_id(message))
+    await message.reply(
+        format_hot_meal(week, day, lang, campus, prices),
+        reply_markup=day_nav_keyboard(day, lang, "hot"),
+        link_preview_options=NO_PREVIEW,
+    )
+
+
+@router.callback_query(F.data.startswith("hot:"))
+async def switch_hot_meal(callback: CallbackQuery):
+    """⬅️/➡️ under /shortm: the same message, another day's hot meal."""
+    campus, lang = await profile(callback)
+    day = callback.data.removeprefix("hot:")
+    if not campus or day not in {"0", "1", "2", "3", "4"}:
+        await callback.answer()
+        return
+    day = int(day)
+
+    week, problem = await load_week(campus, lang)
+    if problem:
+        await callback.answer(re.sub(r"<[^>]+>", "", problem), show_alert=True)
+        return
+    prices = await db.get_show_prices(chat_id(callback))
+    with suppress(TelegramBadRequest):
+        await screens.edit(callback.message, format_hot_meal(week, day, lang, campus, prices), reply_markup=day_nav_keyboard(day, lang, "hot"))
+    await callback.answer()
 
 
 @router.message(Command("week"))
