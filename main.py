@@ -17,7 +17,6 @@ from config import API_TOKEN, LOG_LEVEL
 from handlers.clear import router as clear_router
 from handlers.fallback import router as fallback_router
 from handlers.groups import router as groups_router
-from handlers.inline import router as inline_router
 from handlers.menu import router as menu_router
 from handlers.notify import router as notify_router
 from handlers.prices import router as prices_router
@@ -49,7 +48,6 @@ dp.include_routers(
     menu_router,
     prices_router,
     clear_router,
-    inline_router,
     notify_router,
     fallback_router,
 )
