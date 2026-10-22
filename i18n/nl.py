@@ -84,6 +84,7 @@ TEXTS = {
     "help": (
         "❓ <b>Wat ik kan</b>\n\n"
         "<blockquote>/today of /menu  menu van vandaag\n"
+        "/shortm  alleen de warme maaltijd van vandaag\n"
         "/week  blader door maandag tot vrijdag\n"
         "/prices  prijzen in de cafetaria\n"
         "/subscribe  krijg elke weekdag 's ochtends het menu\n"
@@ -113,4 +114,6 @@ TEXTS = {
     "menu_cleared": "🧹 <b>Menu verwijderd</b>\nDe knoppen zijn weg. Stuur /start om ze terug te krijgen.",
     "menu_cleared_group": "🧹 <b>Menu verwijderd</b>\nAchtergebleven knoppen zijn hier voor iedereen weg.",
     "cmd_clear": "Menu onderaan verwijderen",
+    "no_hot_meal": "🤷 Vandaag staat er geen warme maaltijd op het menu.",
+    "cmd_shortm": "Warme maaltijd van vandaag, kort",
 }
