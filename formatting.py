@@ -93,7 +93,8 @@ def format_hot_meal(week: Week, day: int, lang: str, campus: str, prices: bool =
     meals = [dish for dish in week.days[DAYS[day]] if is_lunch(dish)]
     if not meals:
         return None
-    return "\n".join(_day_header(week, day, lang, campus) + [_dish_card(dish, lang, prices) for dish in meals])
+    header = _day_header(week, day, lang, campus)[:2]  # no blank line: the card sits right under the campus
+    return "\n".join(header + [_dish_card(dish, lang, prices) for dish in meals])
 
 
 def _euro(cents: int) -> str:
