@@ -116,4 +116,9 @@ TEXTS = {
     "cmd_clear": "Menu onderaan verwijderen",
     "no_hot_meal": "🤷 Geen warme maaltijd op het menu.",
     "cmd_shortm": "Warme maaltijd van vandaag, kort",
+    "command_admins_only": "🔒 Alleen beheerders kunnen /{command} hier gebruiken.",
+    "btn_command_access": "🔐 Toegang tot commando's",
+    "command_access": "🔐 <b>Toegang tot commando's</b>\nTik op een commando om te kiezen wie het in deze groep mag gebruiken.",
+    "access_everyone": "👥 Iedereen",
+    "access_admins": "🛡 Alleen beheerders",
 }

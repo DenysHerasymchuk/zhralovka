@@ -115,4 +115,9 @@ TEXTS = {
     "cmd_clear": "Remove the bottom menu",
     "no_hot_meal": "🤷 No hot meal listed.",
     "cmd_shortm": "Today's hot meal, short",
+    "command_admins_only": "🔒 Only admins can use /{command} here.",
+    "btn_command_access": "🔐 Command access",
+    "command_access": "🔐 <b>Command access</b>\nTap a command to choose who can use it in this group.",
+    "access_everyone": "👥 Everyone",
+    "access_admins": "🛡 Admins only",
 }
