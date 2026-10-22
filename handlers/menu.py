@@ -73,7 +73,8 @@ async def show_hot_meal(message: Message):
         return
 
     week, day, problem = await load_today(campus, lang)
-    text = problem or format_hot_meal(week, day, lang) or t(lang, "no_hot_meal")
+    prices = not problem and await db.get_show_prices(chat_id(message))
+    text = problem or format_hot_meal(week, day, lang, campus, prices) or t(lang, "no_hot_meal")
     await message.reply(text, link_preview_options=NO_PREVIEW)
 
 

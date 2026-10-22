@@ -68,14 +68,17 @@ def _date_label(week: Week, day: int, lang: str) -> str:
     return f"{when.day} {month_name(lang, when.month)}"
 
 
-def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str:
+def _day_header(week: Week, day: int, lang: str, campus: str) -> list[str]:
     place = campus if week.kitchen in ("", campus) else f"{campus}, {week.kitchen}"
-    lines = [
+    return [
         f"<b>{day_name(lang, day).capitalize()}</b>, {_date_label(week, day, lang)}",
         f"📍 {escape(place)}",
         "",
     ]
 
+
+def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str:
+    lines = _day_header(week, day, lang, campus)
     dishes = _sorted_dishes(week, day)
     if not dishes:
         lines.append(t(lang, "no_dishes", day=day_name(lang, day)))
@@ -85,12 +88,12 @@ def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = Fals
     return "\n".join(lines)
 
 
-def format_hot_meal(week: Week, day: int, lang: str) -> str | None:
-    """Just the day's lunch, one linked line per dish; None if the kitchen lists none."""
+def format_hot_meal(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str | None:
+    """Like format_day, but with only the day's lunch; None if the kitchen lists none."""
     meals = [dish for dish in week.days[DAYS[day]] if is_lunch(dish)]
     if not meals:
         return None
-    return "\n".join(f"{category_emoji(dish.category_en)} {_dish_link(dish, lang)}" for dish in meals)
+    return "\n".join(_day_header(week, day, lang, campus) + [_dish_card(dish, lang, prices) for dish in meals])
 
 
 def _euro(cents: int) -> str:

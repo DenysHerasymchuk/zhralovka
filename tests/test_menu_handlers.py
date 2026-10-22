@@ -226,12 +226,13 @@ class HotMealTest(HandlerTestCase):
             await menu.show_hot_meal(msg)
         return msg.reply.await_args
 
-    async def test_replies_with_just_the_lunch_as_a_link(self):
+    async def test_replies_with_the_date_campus_and_lunch_only(self):
         await db.set_campus(42, "Geel")
         msg = message("/shortm")
         call = await self.shortm(msg)
         text = call.args[0]
-        self.assertEqual(text.count("\n"), 0)
+        self.assertTrue(text.startswith("<b>Tuesday</b>, 13 October\n📍 Geel\n"))
+        self.assertIn("🍽 <b>Lunch of the day</b>", text)
         self.assertIn(">Tuesday pasta</a>", text)
         self.assertIn('href="https://www.google.com/search?tbm=isch&amp;q=Tuesday+pasta"', text)
         self.assertNotIn("soup", text.lower())
@@ -255,6 +256,12 @@ class HotMealTest(HandlerTestCase):
         await db.set_campus(42, "Geel")
         call = await self.shortm(message("/shortm"), when=TUESDAY + timedelta(days=7))
         self.assertIn("Geel hasn't published", call.args[0])
+
+    async def test_shows_the_price_when_turned_on(self):
+        await db.set_campus(42, "Geel")
+        await db.set_show_prices(42, True)
+        call = await self.shortm(message("/shortm"))
+        self.assertIn("Lunch of the day</b> · €5,40", call.args[0])
 
     async def test_day_without_a_lunch(self):
         await db.set_campus(42, "Geel")
