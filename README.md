@@ -23,6 +23,7 @@
 | Command      | What it does                         |
 |--------------|--------------------------------------|
 | `/today`     | Today's menu                         |
+| `/shortm`    | Just today's hot meal, one line      |
 | `/week`      | Monday to Friday                     |
 | `/prices`    | Cafeteria price board                |
 | `/subscribe` | Daily menu on or off (default 11:00) |
