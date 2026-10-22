@@ -41,15 +41,20 @@ def _price_name(lang: str, en: str, nl: str) -> str:
     return UK_NAMES[en] if lang == "uk" else _pick(lang, en, nl)
 
 
-def _dish_card(dish, lang: str, prices: bool) -> str:
-    category = category_name(lang, dish.category_en) or _pick(lang, dish.category_en, dish.category_nl)
+def _dish_link(dish, lang: str) -> str:
+    """The dish name, linked to a Google Images search for it."""
     name = _pick(lang, dish.en, dish.nl)
     photos = IMAGE_SEARCH_URL + urlencode({"tbm": "isch", "q": name})
+    return f'<a href="{escape(photos)}">{escape(name)}</a>'
+
+
+def _dish_card(dish, lang: str, prices: bool) -> str:
+    category = category_name(lang, dish.category_en) or _pick(lang, dish.category_en, dish.category_nl)
     price = category_price(dish.category_en) if prices else None
     cost = f" · {_euro(price.student)}" if price else ""
     return (
         f"<blockquote>{category_emoji(dish.category_en)} <b>{escape(category)}</b>{cost}\n"
-        f'<a href="{escape(photos)}">{escape(name)}</a></blockquote>'
+        f"{_dish_link(dish, lang)}</blockquote>"
     )
 
 
@@ -78,6 +83,14 @@ def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = Fals
 
     lines += (_dish_card(dish, lang, prices) for dish in dishes)
     return "\n".join(lines)
+
+
+def format_hot_meal(week: Week, day: int, lang: str) -> str | None:
+    """Just the day's lunch, one linked line per dish; None if the kitchen lists none."""
+    meals = [dish for dish in week.days[DAYS[day]] if is_lunch(dish)]
+    if not meals:
+        return None
+    return "\n".join(f"{category_emoji(dish.category_en)} {_dish_link(dish, lang)}" for dish in meals)
 
 
 def _euro(cents: int) -> str:
