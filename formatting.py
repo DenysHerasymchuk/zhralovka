@@ -63,14 +63,6 @@ def _date_label(week: Week, day: int, lang: str) -> str:
     return f"{when.day} {month_name(lang, when.month)}"
 
 
-def day_title(week: Week, day: int, lang: str) -> str:
-    return f"{day_name(lang, day).capitalize()}, {_date_label(week, day, lang)}"
-
-
-def day_summary(week: Week, day: int, lang: str) -> str:
-    return " · ".join(_pick(lang, d.en, d.nl) for d in _sorted_dishes(week, day))
-
-
 def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str:
     place = campus if week.kitchen in ("", campus) else f"{campus}, {week.kitchen}"
     lines = [
