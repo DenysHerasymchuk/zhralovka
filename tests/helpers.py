@@ -27,6 +27,8 @@ def bot(status="member"):
     b.get_chat_member = AsyncMock(return_value=SimpleNamespace(status=status))
     b.send_photo = AsyncMock()
     b.send_message = AsyncMock()
+    b.set_my_commands = AsyncMock()
+    b.delete_my_commands = AsyncMock()
     return b
 
 

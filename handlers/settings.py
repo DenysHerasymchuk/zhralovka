@@ -8,6 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 import db
 import screens
+from commands import set_chat_commands
 from handlers.common import CONTROLLED_COMMANDS, admin_only, campus_prompt, chat_id, in_group, profile, reply_keyboard
 from i18n import LANGS, all_langs, day_short, t
 from keyboards.menu import access_keyboard, campus_keyboard, language_keyboard, settings_keyboard
@@ -164,6 +165,7 @@ async def toggle_access(callback: CallbackQuery):
 
     restricted = await db.get_admin_commands(cid) ^ {choice}
     await db.set_admin_commands(cid, restricted)
+    await set_chat_commands(callback.bot, cid, restricted)
     log.info("Chat %s: /%s is now for %s", cid, choice, "admins" if choice in restricted else "everyone")
     await screens.edit(callback.message, **access_view(restricted, lang))
     await callback.answer()
