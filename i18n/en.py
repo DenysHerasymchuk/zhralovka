@@ -113,6 +113,6 @@ TEXTS = {
     "menu_cleared": "🧹 <b>Menu cleared</b>\nThe buttons are gone. Send /start to bring them back.",
     "menu_cleared_group": "🧹 <b>Menu cleared</b>\nAny leftover buttons are gone for everyone here.",
     "cmd_clear": "Remove the bottom menu",
-    "no_hot_meal": "🤷 No hot meal listed today.",
+    "no_hot_meal": "🤷 No hot meal listed.",
     "cmd_shortm": "Today's hot meal, short",
 }

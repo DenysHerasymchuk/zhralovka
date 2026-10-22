@@ -88,12 +88,13 @@ def format_day(week: Week, day: int, lang: str, campus: str, prices: bool = Fals
     return "\n".join(lines)
 
 
-def format_hot_meal(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str | None:
-    """Like format_day, but with only the day's lunch; None if the kitchen lists none."""
+def format_hot_meal(week: Week, day: int, lang: str, campus: str, prices: bool = False) -> str:
+    """Like format_day, but with only the day's lunch."""
     meals = [dish for dish in week.days[DAYS[day]] if is_lunch(dish)]
+    header = _day_header(week, day, lang, campus)[:2]  # no blank line: the card sits right under the campus
     if not meals:
-        return None
-    return "\n".join(_day_header(week, day, lang, campus) + [_dish_card(dish, lang, prices) for dish in meals])
+        return "\n".join(header + [t(lang, "no_hot_meal")])
+    return "\n".join(header + [_dish_card(dish, lang, prices) for dish in meals])
 
 
 def _euro(cents: int) -> str:

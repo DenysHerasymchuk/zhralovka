@@ -13,6 +13,7 @@ from tests.helpers import (
     WEEK,
     HandlerTestCase,
     callback,
+    group_callback,
     group_message,
     message,
     sent_markup,
@@ -237,7 +238,7 @@ class HotMealTest(HandlerTestCase):
         self.assertIn('href="https://www.google.com/search?tbm=isch&amp;q=Tuesday+pasta"', text)
         self.assertNotIn("soup", text.lower())
         self.assertTrue(call.kwargs["link_preview_options"].is_disabled)
-        self.assertNotIn("reply_markup", call.kwargs)
+        self.assertEqual([b.callback_data for b in call.kwargs["reply_markup"].inline_keyboard[0]], ["hot:0", "hot:2"])
         msg.answer_photo.assert_not_awaited()
 
     async def test_works_in_a_group_for_any_member(self):
@@ -267,10 +268,64 @@ class HotMealTest(HandlerTestCase):
         await db.set_campus(42, "Geel")
         soup_only = WEEK._replace(days={**WEEK.days, "Tuesday": WEEK.days["Tuesday"][:1]})
         call = await self.shortm(message("/shortm"), week=soup_only)
-        self.assertEqual(call.args[0], TEXTS["en"]["no_hot_meal"])
+        self.assertTrue(call.args[0].endswith("📍 Geel\n" + TEXTS["en"]["no_hot_meal"]))
 
     async def test_no_campus_asks_for_one(self):
         msg = message("/shortm")
         msg.reply = AsyncMock()
         await menu.show_hot_meal(msg)
         self.assertEqual(sent_text(msg), TEXTS["en"]["pick_campus"])
+
+
+class HotMealNavigationTest(HandlerTestCase):
+    async def tap(self, data, cb=None, week=WEEK):
+        cb = cb or callback(data)
+        with patch("handlers.menu.fetch_week", AsyncMock(return_value=week)):
+            await menu.switch_hot_meal(cb)
+        return cb
+
+    async def test_layout_has_no_blank_line_before_the_lunch(self):
+        await db.set_campus(42, "Geel")
+        cb = await self.tap("hot:2")
+        text = cb.message.edit_text.await_args.args[0]
+        self.assertIn("📍 Geel\n<blockquote>🍽 <b>Lunch of the day</b>", text)
+
+    async def test_next_day_edits_the_same_message_with_that_days_lunch(self):
+        await db.set_campus(42, "Geel")
+        cb = await self.tap("hot:2")
+        edit = cb.message.edit_text.await_args
+        self.assertTrue(edit.args[0].startswith("<b>Wednesday</b>, 14 October"))
+        self.assertIn(">Wednesday pasta</a>", edit.args[0])
+        self.assertNotIn("soup", edit.args[0].lower())
+        self.assertTrue(edit.kwargs["link_preview_options"].is_disabled)
+        self.assertEqual([b.callback_data for b in edit.kwargs["reply_markup"].inline_keyboard[0]], ["hot:1", "hot:3"])
+        cb.message.answer_photo.assert_not_awaited()
+
+    async def test_edges_have_one_button(self):
+        await db.set_campus(42, "Geel")
+        monday = (await self.tap("hot:0")).message.edit_text.await_args.kwargs["reply_markup"]
+        friday = (await self.tap("hot:4")).message.edit_text.await_args.kwargs["reply_markup"]
+        self.assertEqual([b.callback_data for b in monday.inline_keyboard[0]], ["hot:1"])
+        self.assertEqual([b.callback_data for b in friday.inline_keyboard[0]], ["hot:3"])
+
+    async def test_group_buttons_use_the_groups_campus(self):
+        await db.set_campus(GROUP, "Geel")
+        await db.set_campus(7, "Lier")
+        fetch = AsyncMock(return_value=WEEK)
+        cb = group_callback("hot:3")
+        with patch("handlers.menu.fetch_week", fetch):
+            await menu.switch_hot_meal(cb)
+        self.assertEqual(fetch.await_args.args[0], "Geel")
+
+    async def test_bad_day_is_ignored(self):
+        await db.set_campus(42, "Geel")
+        cb = await self.tap("hot:9")
+        cb.message.edit_text.assert_not_awaited()
+
+    async def test_menu_service_down_shows_a_popup(self):
+        await db.set_campus(42, "Geel")
+        cb = callback("hot:2")
+        with patch("handlers.menu.fetch_week", AsyncMock(side_effect=MenuUnavailable)):
+            await menu.switch_hot_meal(cb)
+        self.assertTrue(cb.answer.await_args.kwargs["show_alert"])
+        cb.message.edit_text.assert_not_awaited()

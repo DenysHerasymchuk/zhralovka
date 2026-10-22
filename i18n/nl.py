@@ -114,6 +114,6 @@ TEXTS = {
     "menu_cleared": "🧹 <b>Menu verwijderd</b>\nDe knoppen zijn weg. Stuur /start om ze terug te krijgen.",
     "menu_cleared_group": "🧹 <b>Menu verwijderd</b>\nAchtergebleven knoppen zijn hier voor iedereen weg.",
     "cmd_clear": "Menu onderaan verwijderen",
-    "no_hot_meal": "🤷 Vandaag staat er geen warme maaltijd op het menu.",
+    "no_hot_meal": "🤷 Geen warme maaltijd op het menu.",
     "cmd_shortm": "Warme maaltijd van vandaag, kort",
 }
